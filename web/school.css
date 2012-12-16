@@ -1,0 +1,89 @@
+html, body{margin:0;padding:0;border:0;height:100%;width:100%;}
+html {background:#aaaaaa;}
+#login li{
+	border:0; margin:0;padding:0; list-style:none;
+}
+.frame{
+	height: 600px;
+	width: 800px;
+	margin-top: -300px;
+	margin-left: -400px;
+	top: 50%;
+	left: 50%;
+	position: absolute;
+}
+
+.top_header {
+	width: 100%;
+	height: 150px;
+	/*
+	font-size: 16px;
+	line-height: 30px;
+	text-align: right;
+	margin: -10px;
+	*/
+}
+
+.left_header{
+	background-image:url("images/Vertical_line.png");
+	background-repeat:no-repeat;
+	background-position:right;
+	background-size: 13px 100%;
+	width: 200px;
+	height: 420px;
+	font-size: 22px;
+}
+
+.left_header .table .tr_a{
+	TEXT-DECORATION: none;
+	color: black;
+}
+
+.right_header{
+	width: 600px;
+	height: 420px;
+	margin-left: 200px;
+	margin-top: -420px;
+}
+
+.bottom_header{
+	width: 100%;
+	height: 30px;
+}
+#login{
+font-family: tahoma,arial,Kalimati,Helvetica,"Lucida Grande",sans-serif;
+/*background-image:url("car.png");*/
+background-size:100%;
+height:150px;
+width:320px;
+margin-top:-75px;
+margin-left:-160px;
+top:50%;
+left:50%;
+position:absolute;
+}
+.feedback {
+    color: red;
+    font-size: 16px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+}
+#login label {
+margin-left: 5%;
+font-size:100%;
+line-height:26px;
+display:block;
+overflow:auto;
+}
+#login label input{
+color: #030303;
+background-color: #C2C5C7;
+margin-right:5%;
+float:right;
+width:50%;
+}
+#loginSubmit {
+margin-top: 5%;
+margin-left: 50%;
+}

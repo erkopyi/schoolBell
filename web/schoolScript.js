@@ -9,9 +9,12 @@ webpage.left_header;
 webpage.login;
 webpage.status_page;
 webpage.users;
-webpage.getfile
+webpage.getfile;
+webpage.rules_page;
 
 var webstatic = new Object();
+webstatic.getTimeprofiles;
+webstatic.getRules;
 
 
 // Get all static files
@@ -30,6 +33,7 @@ function getFileId(name, nr, run_init){
 			if(nr == 4){webpage.status_page = xmlhttp.responseText;}
 			if(nr == 5){webpage.users = xmlhttp.responseText;}
 			if(nr == 6){webpage.getfile = xmlhttp.responseText;}
+			if(nr == 7){webpage.rules_page = xmlhttp.responseText;}
 			if(run_init){
 				login_page();	
 			}
@@ -104,20 +108,30 @@ function parse(json_response){
 	if(json_response.allRules){
 		status_show_rules(json_response);
 	}
+	if(json_response.Rules){
+		rules_show_rules(json_response);
+	}
+	if(json_response.timeprofiles){
+		parse_timeprofiles(json_response);
+	}
 }
 
-/*	Load all statics files	*/
+/*******************************	Load all statics files	**************************************/
 function main_init(){
 	getFileId("main.html", 1, null);
 	getFileId("left_header.html", 2, null);
 	getFileId("login.html", 3, null);
 	getFileId("status_page.html", 4, null);
 	getFileId("users.html", 5, null);
-	getFileId("getfile.html", 6, "start");
+	getFileId("getfile.html", 6, null);
+	getFileId("rulepage.html", 7, "start");
 }
 
 
-/*	login page	*/
+/*******************************	login page	**********************************************/
+function login_status(i){
+	document.getElementById("feedback").innerHTML = i;
+}
 
 function login_page(){
 	if(status_interval){
@@ -155,7 +169,7 @@ function log_out(){
         log_out.sendPostToServer(logout);
 }
 
-/*	Main page	*/
+/*********************************	Main page	**************************************************/
 
 function main_page(){
 	document.getElementById("body").innerHTML=webpage.main;
@@ -340,6 +354,17 @@ function users_page(){
 
 
 /***********************************	       Status page             *********************************************/
+function get_rpistatus(){
+	var getStatus = {};
+	getStatus.rpistatus = 'true';
+	var rpi_status = new sendDataToServer(); 	
+	rpi_status.sendPostToServer(getStatus);
+}
+
+function set_loop(){
+	setInterval(function(){get_rpistatus()},10000);
+}
+
 function status_page(){
 	document.getElementById("right_header").innerHTML=webpage.status_page;
 	var getRules = {};
@@ -384,7 +409,83 @@ function status_rule_active(id){
 	toggle_EnableRule.sendPostToServer(toggleEnableRule);
 }
 
-/*	Files		*/
+/**********************************	Rules	******************************************/
+function rules_page(){
+	document.getElementById("right_header").innerHTML=webpage.rules_page;
+	var queryTimeprofile = {};
+        queryTimeprofile.queryTimeprofile = 'true';
+	var query_Timeprofile = new sendDataToServer(); 	
+	query_Timeprofile.sendPostToServer(queryTimeprofile);
+	var queryRules = {};
+        queryRules.queryRules = 'true';
+	var query_rules = new sendDataToServer(); 	
+	query_rules.sendPostToServer(queryRules);
+}
+
+function rules_show_rules(json_response){
+	var check = document.getElementById("loadRules");
+	if(check){
+		webstatic.getRules = json_response.Rules;
+		var tmp_string = "<table id='rulesTable' border='0'><tr>" + 
+			"<td>Nimi</td>" +
+			"<td>Ajaprofiil</td>" +
+			"<td>Track</td>" +
+			"</td></tr>";
+		for(var i = 0; i < json_response.Rules.length; i++){
+			tmp_string += 
+				"<tr><td>" + json_response.Rules[i].name + "</td>" + 
+				"<td>" + json_response.Rules[i].timeprofileName + "</td>" +
+				"<td>" + json_response.Rules[i].track + "</td>" +
+				"<td>" + "<input type='button' onclick='rule_edit(" + json_response.Rules[i].id + ")' value='Muuda' />" + 
+				"</td></tr>";
+		}
+		tmp_string += "</table><hr>";
+		document.getElementById("loadRules").innerHTML = tmp_string;
+	}
+}
+
+function rule_edit(ruleID){
+	var temp = 0;
+	var enable_check;
+	document.getElementById('loadRules').innerHTML = "";
+	for(var i = 0; i < webstatic.getRules.length; i++){
+		if(webstatic.getRules[i].id == ruleID){
+///////////////POOLELI !!!
+			tmp_string = "<hr><table id='userTable' border='0'><tr>" +
+                                        "<td>Lubatud</td>" +
+                                        "<td>Nimi</td>" +
+                                        "<td>Kasutajanimi</td>" +
+                                        "<td>Parool</td>" +
+                                        "<td>Parool uuesti</td>" +
+                                        "</td></tr>" +
+					"<td><input id='editEnabled' type='checkbox'" + enable_check +"/></td>" +
+					"<td><input id='editName' type='text' value='" + usersAll[i].name  + "'/></td>" +
+					"<td><input id='editUsername' value='" + usersAll[i].username + "' type='text'/></td>" +
+					"<td><input id='editPassword1'  type='password'/></td>" +
+					"<td><input id='editPassword2' type='password'/></td>" +
+					"</td></tr>" +
+					"</table><hr>" +
+					"<input type='button' value='Salvesta' onclick='user_save(" + usersAll[i].id + ")'/>" +
+					"<input type='button' value='Sulge' onclick='edit_close()'/>";
+					document.getElementById('editUser').innerHTML = tmp_string;
+		}
+	}
+	if(temp == 0){
+		document.getElementById('editUser').innerHTML = "";
+		users_page();
+	}
+//////////////////////POOLELI
+}
+
+
+/*********************************	Timeprofiles	********************************/
+function parse_timeprofiles(json_response){
+	webstatic.getTimeprofiles = json_response.timeprofiles;
+}
+
+
+
+/***********************************	Files	******************************************/
 function get_file(){
 	document.getElementById("right_header").innerHTML=webpage.getfile;
 	var getFiles = {};
@@ -426,23 +527,61 @@ function delete_track_file(name){
 	}
 }
 
+function fileUpload(form, action_url, div_id) {
+	// Create the iframe...
+	var iframe = document.createElement("iframe");
+	iframe.setAttribute("id", "upload_iframe");
+	iframe.setAttribute("name", "upload_iframe");
+	iframe.setAttribute("width", "0");
+	iframe.setAttribute("height", "0");
+	iframe.setAttribute("border", "0");
+	iframe.setAttribute("style", "width: 0; height: 0; border: none;");
 
+	// Add to document...
+	form.parentNode.appendChild(iframe);
+	window.frames['upload_iframe'].name = "upload_iframe";
 
-function login_status(i){
-	document.getElementById("feedback").innerHTML = i;
+	iframeId = document.getElementById("upload_iframe");
+
+	// Add event...
+	var eventHandler = function () {
+
+		if (iframeId.detachEvent) iframeId.detachEvent("onload", eventHandler);
+		else iframeId.removeEventListener("load", eventHandler, false);
+
+		// Message from server...
+		if (iframeId.contentDocument) {
+			content = iframeId.contentDocument.body.innerHTML;
+		} else if (iframeId.contentWindow) {
+			content = iframeId.contentWindow.document.body.innerHTML;
+		} else if (iframeId.document) {
+			content = iframeId.document.body.innerHTML;
+		}
+
+		document.getElementById(div_id).innerHTML = content;
+		get_file();
+
+		// Del the iframe...
+		setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
+	}
+
+	if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
+	if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
+
+	// Set properties of form...
+	form.setAttribute("target", "upload_iframe");
+	form.setAttribute("action", action_url);
+	form.setAttribute("method", "post");
+	form.setAttribute("enctype", "multipart/form-data");
+	form.setAttribute("encoding", "multipart/form-data");
+
+	// Submit the form...
+	form.submit();
+
+	document.getElementById(div_id).innerHTML = "Uploading...";
 }
 
-function get_rpistatus(){
-	var getStatus = {};
-	getStatus.rpistatus = 'true';
-	var rpi_status = new sendDataToServer(); 	
-	rpi_status.sendPostToServer(getStatus);
-}
-
-function set_loop(){
-	setInterval(function(){get_rpistatus()},10000);
-}
-
+//***********************************************************************************************
 function sendDataToServer(){
 	this.sendPostToServer = function(obj){
 		var xmlhttp;

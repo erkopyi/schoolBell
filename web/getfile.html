@@ -1,11 +1,9 @@
 <div id="loadFile"></div>
 <div class='fail_button'>
-	<!--form method='POST' name='my_form' enctype='multipart/form-data' action='server.php'-->
-	<form action="server.php" method="post" target='test' enctype='multipart/form-data'>
-		<!--input type='hidden' name='MAX_FILE_SIZE' value="10000000"/-->
-		<input name="upload_file" type="file" />
-		<br />
-		<input type="submit" value="Saada fail" />
-	</form>
-	<iframe style='display: none;' name='test' onload='get_file()'></iframe
+	<form>
+		<input type="file" name="upload_file"  /></br>
+		<input type="button" value="Saada"
+			onClick="fileUpload(this.form,'server.php','upload'); return false;" >
+		<div id="upload"></div>
+		</form>
 </div>

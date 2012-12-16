@@ -15,6 +15,7 @@ webpage.rules_page;
 var webstatic = new Object();
 webstatic.getTimeprofiles;
 webstatic.getRules;
+webstatic.getFiles;
 
 
 // Get all static files
@@ -107,6 +108,15 @@ function parse(json_response){
 	}
 	if(json_response.allRules){
 		status_show_rules(json_response);
+	}
+	if(json_response.updateRule == "true"){
+		rules_updated();
+	}
+	if(json_response.deleteRule == "true"){
+		rules_updated();
+	}
+	if(json_response.createRule == "true"){
+		rules_updated();
 	}
 	if(json_response.Rules){
 		rules_show_rules(json_response);
@@ -420,13 +430,18 @@ function rules_page(){
         queryRules.queryRules = 'true';
 	var query_rules = new sendDataToServer(); 	
 	query_rules.sendPostToServer(queryRules);
+	var getFiles = {};
+	getFiles.getFiles = 'true';
+	var get_f = new sendDataToServer(); 	
+	get_f.sendPostToServer(getFiles);
+
 }
 
 function rules_show_rules(json_response){
 	var check = document.getElementById("loadRules");
 	if(check){
 		webstatic.getRules = json_response.Rules;
-		var tmp_string = "<table id='rulesTable' border='0'><tr>" + 
+		var tmp_string = "<hr><table id='rulesTable' border='0'><tr>" + 
 			"<td>Nimi</td>" +
 			"<td>Ajaprofiil</td>" +
 			"<td>Track</td>" +
@@ -436,48 +451,163 @@ function rules_show_rules(json_response){
 				"<tr><td>" + json_response.Rules[i].name + "</td>" + 
 				"<td>" + json_response.Rules[i].timeprofileName + "</td>" +
 				"<td>" + json_response.Rules[i].track + "</td>" +
-				"<td>" + "<input type='button' onclick='rule_edit(" + json_response.Rules[i].id + ")' value='Muuda' />" + 
+				"<td>" + "<input type='button' onclick='rule_edit(" + json_response.Rules[i].id + ")' value='Muuda' /></td>" + 
+				"<td>" + "<input type='button' onclick='rule_delete(" + json_response.Rules[i].id + ")' value='Kustuta' />" + 
 				"</td></tr>";
 		}
-		tmp_string += "</table><hr>";
+		tmp_string += "</table><hr>" + 
+				"<table id='createRulesTable' border='0'><tr>" +
+				"<td>" + "<input type='button' onclick='rule_create_new()' value='Loo uus' />" + 
+				"</td></tr>";
 		document.getElementById("loadRules").innerHTML = tmp_string;
 	}
 }
 
 function rule_edit(ruleID){
-	var temp = 0;
 	var enable_check;
+	var tmp_string;
 	document.getElementById('loadRules').innerHTML = "";
 	for(var i = 0; i < webstatic.getRules.length; i++){
 		if(webstatic.getRules[i].id == ruleID){
-///////////////POOLELI !!!
 			tmp_string = "<hr><table id='userTable' border='0'><tr>" +
-                                        "<td>Lubatud</td>" +
                                         "<td>Nimi</td>" +
-                                        "<td>Kasutajanimi</td>" +
-                                        "<td>Parool</td>" +
-                                        "<td>Parool uuesti</td>" +
+                                        "<td>Ajaprofiil</td>" +
+                                        "<td>Track</td>" +
                                         "</td></tr>" +
-					"<td><input id='editEnabled' type='checkbox'" + enable_check +"/></td>" +
-					"<td><input id='editName' type='text' value='" + usersAll[i].name  + "'/></td>" +
-					"<td><input id='editUsername' value='" + usersAll[i].username + "' type='text'/></td>" +
-					"<td><input id='editPassword1'  type='password'/></td>" +
-					"<td><input id='editPassword2' type='password'/></td>" +
-					"</td></tr>" +
+					"<td><input id='ruleName' type='text' value='" + webstatic.getRules[i].name  + "'/></td>" +
+					"<td> <select id=ruleTimeprofileID>";
+			var temp_id = new Array();
+			var temp_true = 1;
+			for(var j = 0; j < webstatic.getTimeprofiles.length; j++){
+				for(var k = 0; k < temp_id.length; k++){
+					temp_true = 1;
+					if (temp_id[k] == webstatic.getTimeprofiles[j].timeprofileID){
+						temp_true = 0;
+						break;
+					}
+				}
+				if(temp_true){	
+					tmp_string += "<option value='" + webstatic.getTimeprofiles[j].timeprofileID  + "'>" + webstatic.getTimeprofiles[j].name  + "</option>";
+					temp_id.push(webstatic.getTimeprofiles[j].timeprofileID);
+				}
+				temp_true = 0;
+			}
+			tmp_string += "</select></td><td> <select id=ruleTrack>";
+			for(var j = 0; j < webstatic.getFiles.allFiles.length; j++){
+				tmp_string += "<option value='" + webstatic.getFiles.allFiles[j].filename  + "'>" + webstatic.getFiles.allFiles[j].filename  + "</option>";
+			}
+			tmp_string +=	"</select></td></tr>" +
 					"</table><hr>" +
-					"<input type='button' value='Salvesta' onclick='user_save(" + usersAll[i].id + ")'/>" +
-					"<input type='button' value='Sulge' onclick='edit_close()'/>";
-					document.getElementById('editUser').innerHTML = tmp_string;
+					"<input type='button' value='Salvesta' onclick='rule_save(" + webstatic.getRules[i].id + ")'/>" +
+					"<input type='button' value='Sulge' onclick='rules_page()'/>";
+					document.getElementById('loadRules').innerHTML = tmp_string;
 		}
 	}
-	if(temp == 0){
-		document.getElementById('editUser').innerHTML = "";
-		users_page();
+}
+
+function rule_create_new(){
+	var enable_check;
+	var tmp_string;
+	document.getElementById('loadRules').innerHTML = "";
+	tmp_string = "<hr><table id='userTable' border='0'><tr>" +
+			"<td>Nimi</td>" +
+			"<td>Ajaprofiil</td>" +
+			"<td>Track</td>" +
+			"</td></tr>" +
+			"<td><input id='ruleName' type='text' value=''/></td>" +
+			"<td> <select id=ruleTimeprofileID>";
+	var temp_id = new Array();
+	var temp_true = 1;
+	for(var j = 0; j < webstatic.getTimeprofiles.length; j++){
+		for(var k = 0; k < temp_id.length; k++){
+			temp_true = 1;
+			if (temp_id[k] == webstatic.getTimeprofiles[j].timeprofileID){
+				temp_true = 0;
+				break;
+			}
+		}
+		if(temp_true){	
+			tmp_string += "<option value='" + webstatic.getTimeprofiles[j].timeprofileID  + "'>" + webstatic.getTimeprofiles[j].name  + "</option>";
+			temp_id.push(webstatic.getTimeprofiles[j].timeprofileID);
+		}
+		temp_true = 0;
 	}
-//////////////////////POOLELI
+	tmp_string += "</select></td><td> <select id=ruleTrack>";
+	for(var j = 0; j < webstatic.getFiles.allFiles.length; j++){
+		tmp_string += "<option value='" + webstatic.getFiles.allFiles[j].filename  + "'>" + webstatic.getFiles.allFiles[j].filename  + "</option>";
+	}
+	tmp_string +=	"</select></td></tr>" +
+			"</table><hr>" +
+			"<input type='button' value='Salvesta' onclick='rule_create_save()'/>" +
+			"<input type='button' value='Sulge' onclick='rules_page()'/>";
+	document.getElementById('loadRules').innerHTML = tmp_string;
+}
+
+function rule_create_save(){
+	var rule_create_response = {};
+	rule_create_response.createRule = {};
+	if(document.getElementById('ruleName').value.length < 1){
+		window.alert("Reegli nimi sisestamata");
+	}else{
+		rule_create_response.createRule.name = document.getElementById('ruleName').value;
+		if(document.getElementById('ruleTimeprofileID').value == null){
+			window.alert("Ajaprofiil sisestamata");
+		}else{
+			rule_create_response.createRule.timeprofileID = document.getElementById('ruleTimeprofileID').value;
+			if(document.getElementById('ruleTrack').value == null){
+				window.alert("Track valimata");
+			}else{
+				rule_create_response.createRule.track = document.getElementById('ruleTrack').value;
+				document.getElementById('loadRules').innerHTML = "Loading";
+				var ruleCreateResponse = new sendDataToServer(); 	
+				ruleCreateResponse.sendPostToServer(rule_create_response);
+			}
+			
+		}
+		
+	}
 }
 
 
+function rule_delete(ruleID){
+	var temp;
+	var rule_response = {};
+	rule_response.deleteRule = {};
+	rule_response.deleteRule.id = ruleID;
+	temp = window.confirm("Kas olete kindel et soovite kustutada reegli \n");
+	if(temp){
+		var ruleDelete = new sendDataToServer(); 	
+		ruleDelete.sendPostToServer(rule_response);
+	}
+}
+
+function rule_save(ruleID){
+	var rule_response = {};
+	rule_response.updateRule = {};
+	if(document.getElementById('ruleName').value.length < 1){
+		window.alert("Reegli nimi sisestamata");
+	}else{
+		rule_response.updateRule.name = document.getElementById('ruleName').value;
+		if(document.getElementById('ruleTimeprofileID').value == null){
+			window.alert("Ajaprofiil sisestamata");
+		}else{
+			rule_response.updateRule.timeprofileID = document.getElementById('ruleTimeprofileID').value;
+			if(document.getElementById('ruleTrack').value == null){
+				window.alert("Track valimata");
+			}else{
+				rule_response.updateRule.track = document.getElementById('ruleTrack').value;
+				rule_response.updateRule.id = ruleID;
+				var ruleResponse = new sendDataToServer(); 	
+				ruleResponse.sendPostToServer(rule_response);
+			}
+			
+		}
+		
+	}
+}
+function rules_updated(){
+	rules_page();
+}
 /*********************************	Timeprofiles	********************************/
 function parse_timeprofiles(json_response){
 	webstatic.getTimeprofiles = json_response.timeprofiles;
@@ -496,8 +626,9 @@ function get_file(){
 
 function load_files(json_response){
 	var check = document.getElementById("loadFile");
-	document.getElementById("loadFile").innerHTML = "Loading...";
+	webstatic.getFiles = json_response;
 	if(check){
+		document.getElementById("loadFile").innerHTML = "Loading...";
 		var tmp_string = "<table id='track_files' border='0'><hr><tr>" +
                         "<td>Nimi</td>" +
                         "</td></tr>";

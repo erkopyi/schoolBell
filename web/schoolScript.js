@@ -11,6 +11,7 @@ webpage.status_page;
 webpage.users;
 webpage.getfile;
 webpage.rules_page;
+webpage.timeprofiles_page;
 
 var webstatic = new Object();
 webstatic.getTimeprofiles;
@@ -35,6 +36,7 @@ function getFileId(name, nr, run_init){
 			if(nr == 5){webpage.users = xmlhttp.responseText;}
 			if(nr == 6){webpage.getfile = xmlhttp.responseText;}
 			if(nr == 7){webpage.rules_page = xmlhttp.responseText;}
+			if(nr == 8){webpage.timeprofiles_page = xmlhttp.responseText;}
 			if(run_init){
 				login_page();	
 			}
@@ -134,7 +136,8 @@ function main_init(){
 	getFileId("status_page.html", 4, null);
 	getFileId("users.html", 5, null);
 	getFileId("getfile.html", 6, null);
-	getFileId("rulepage.html", 7, "start");
+	getFileId("rulepage.html", 7, null);
+	getFileId("timeprofile.html", 8, "start");
 }
 
 
@@ -613,7 +616,80 @@ function parse_timeprofiles(json_response){
 	webstatic.getTimeprofiles = json_response.timeprofiles;
 }
 
+function timeprofiles_page(){
+	document.getElementById("right_header").innerHTML=webpage.timeprofiles_page;
+	var Timeprofile = {};
+        Timeprofile.queryTimeprofile = 'true';
+	var queryTimeprofile = new sendDataToServer(); 	
+	queryTimeprofile.sendPostToServer(Timeprofile);
+	show_timeprofile();
+}
 
+function show_timeprofile(){
+	var check = document.getElementById("loadTimeprofile");
+	if(check){
+		var tmp_string = "<hr><table id='timeprofileTable' border='0'><tr>" + 
+		"<td>Nimi</td>" +
+		"</td></tr>";
+		var temp_id = new Array();
+		var temp_true = 1;
+		for(var j = 0; j < webstatic.getTimeprofiles.length; j++){
+			for(var k = 0; k < temp_id.length; k++){
+				temp_true = 1;
+				if (temp_id[k] == webstatic.getTimeprofiles[j].timeprofileID){
+					temp_true = 0;
+					break;
+				}
+			}
+			if(temp_true){	
+				tmp_string += "<tr><td>" + webstatic.getTimeprofiles[j].name  + "</td>" +
+						"<td>" + "<input type='button' onclick='timeprofile_edit(" + webstatic.getTimeprofiles[j].timeprofileID + ")' value='Muuda' />" +
+						"</td></tr>";
+				temp_id.push(webstatic.getTimeprofiles[j].timeprofileID);
+			}
+			temp_true = 0;
+		}
+		tmp_string += "</table><hr>" + 
+				"<table id='createTimeprofile' border='0'><tr>" +
+				"<td>" + "<input type='button' onclick='timeprofile_create_new()' value='Loo uus' />" + 
+				"</td></tr>";
+		document.getElementById("loadTimeprofile").innerHTML = tmp_string;
+	}
+}
+
+function timeprofile_edit(timeprofileID){
+	var tmp_string;
+	var j = 1;
+	tmp_string = "";
+	document.getElementById('loadTimeprofile').innerHTML = "";
+	for(var i = 0; i < webstatic.getTimeprofiles.length; i++){
+		if(webstatic.getTimeprofiles[i].timeprofileID == timeprofileID){
+			tmp_string += "<div><hr>" +
+                                        "<input id='" + j + "_name' type='text' value='" + webstatic.getTimeprofiles[i].name  + "'/></div";
+			break;
+		}
+	}
+	tmp_string += "<div><hr><table id='userTable' border='0'>";
+	
+	for(var i = 0; i < webstatic.getTimeprofiles.length; i++){
+		if(webstatic.getTimeprofiles[i].timeprofileID == timeprofileID){
+			tmp_string += "<tr>";
+			tmp_string += "<td><input id='" + j + "_mon' type='checkbox'" + ((webstatic.getTimeprofiles[i].mon == 'true') ? 'checked' : '')  +"/>E</td>" ;
+			tmp_string += "<td><input id='" + j + "_tue' type='checkbox'" + ((webstatic.getTimeprofiles[i].tue == 'true') ? 'checked' : '')  +"/>T</td>" ;
+			tmp_string += "<td><input id='" + j + "_wed' type='checkbox'" + ((webstatic.getTimeprofiles[i].wed == 'true') ? 'checked' : '')  +"/>K</td>" ;
+			tmp_string += "<td><input id='" + j + "_thu' type='checkbox'" + ((webstatic.getTimeprofiles[i].thu == 'true') ? 'checked' : '')  +"/>N</td>" ;
+			tmp_string += "<td><input id='" + j + "_fri' type='checkbox'" + ((webstatic.getTimeprofiles[i].fri == 'true') ? 'checked' : '')  +"/>R</td>" ;
+			tmp_string += "<td><input id='" + j + "_sat' type='checkbox'" + ((webstatic.getTimeprofiles[i].sat == 'true') ? 'checked' : '')  +"/>L</td>" ;
+			tmp_string += "<td><input id='" + j + "_sun' type='checkbox'" + ((webstatic.getTimeprofiles[i].sun == 'true') ? 'checked' : '')  +"/>P</td>" ;
+			tmp_string += "</tr>";
+			j++;
+		}
+	}
+	tmp_string += "</tr></table><hr></div>" +
+			"<div><input type='button' value='Lisa rida' onclick='timeprofile_add_row()'/></div>";
+
+	document.getElementById("loadTimeprofile").innerHTML = tmp_string;
+}
 
 /***********************************	Files	******************************************/
 function get_file(){

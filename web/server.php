@@ -76,7 +76,7 @@ if(isset($_POST['jsonString'])){
 	}
 	if(($json_parse->{'queryTimeprofile'} == "true") && ($_SESSION['auth'] == 'true')){
 		$dbhandle = new SQLite3('db_school.db');
-		$results = $dbhandle->query("SELECT * FROM timeprofile");	
+		$results = $dbhandle->query("SELECT * FROM timeprofile order by timeprofileID, hour, minute");	
 		if($results){
 			$match = 1;
 			$timeprofile_array = [];

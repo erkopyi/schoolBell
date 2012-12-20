@@ -12,6 +12,7 @@ webpage.users;
 webpage.getfile;
 webpage.rules_page;
 webpage.timeprofiles_page;
+webpage.timeprofiles_sub_page;
 
 var webstatic = new Object();
 webstatic.getTimeprofiles;
@@ -659,36 +660,80 @@ function show_timeprofile(){
 
 function timeprofile_edit(timeprofileID){
 	var tmp_string;
-	var j = 1;
+	var j = 0;
 	tmp_string = "";
 	document.getElementById('loadTimeprofile').innerHTML = "";
 	for(var i = 0; i < webstatic.getTimeprofiles.length; i++){
 		if(webstatic.getTimeprofiles[i].timeprofileID == timeprofileID){
-			tmp_string += "<div><hr>" +
-                                        "<input id='" + j + "_name' type='text' value='" + webstatic.getTimeprofiles[i].name  + "'/></div";
+			tmp_string += "<hr><FORM NAME='boxes'>" +
+                                        "<input id='" + j + "_name' type='text' value='" + webstatic.getTimeprofiles[i].name  + "'/>";
 			break;
 		}
 	}
-	tmp_string += "<div><hr><table id='userTable' border='0'>";
-	
-	for(var i = 0; i < webstatic.getTimeprofiles.length; i++){
+	webstatic.timeprofiles_sub_page = [];
+	tmp_string += "<hr><table id='userTable' border='0'><tbody id='tp_val'>";
+	for(i = 0; i < webstatic.getTimeprofiles.length; i++){
 		if(webstatic.getTimeprofiles[i].timeprofileID == timeprofileID){
-			tmp_string += "<tr>";
-			tmp_string += "<td><input id='" + j + "_mon' type='checkbox'" + ((webstatic.getTimeprofiles[i].mon == 'true') ? 'checked' : '')  +"/>E</td>" ;
-			tmp_string += "<td><input id='" + j + "_tue' type='checkbox'" + ((webstatic.getTimeprofiles[i].tue == 'true') ? 'checked' : '')  +"/>T</td>" ;
-			tmp_string += "<td><input id='" + j + "_wed' type='checkbox'" + ((webstatic.getTimeprofiles[i].wed == 'true') ? 'checked' : '')  +"/>K</td>" ;
-			tmp_string += "<td><input id='" + j + "_thu' type='checkbox'" + ((webstatic.getTimeprofiles[i].thu == 'true') ? 'checked' : '')  +"/>N</td>" ;
-			tmp_string += "<td><input id='" + j + "_fri' type='checkbox'" + ((webstatic.getTimeprofiles[i].fri == 'true') ? 'checked' : '')  +"/>R</td>" ;
-			tmp_string += "<td><input id='" + j + "_sat' type='checkbox'" + ((webstatic.getTimeprofiles[i].sat == 'true') ? 'checked' : '')  +"/>L</td>" ;
-			tmp_string += "<td><input id='" + j + "_sun' type='checkbox'" + ((webstatic.getTimeprofiles[i].sun == 'true') ? 'checked' : '')  +"/>P</td>" ;
-			tmp_string += "</tr>";
+			webstatic.timeprofiles_sub_page[j] = "<tr>";
+			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='mon' name='tp_values'" + ((webstatic.getTimeprofiles[i].mon == 'true') ? 'checked' : '')  +"/>E</td>" ;
+			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='tue' name='tp_values'" + ((webstatic.getTimeprofiles[i].tue == 'true') ? 'checked' : '')  +"/>T</td>" ;
+			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='wed' name='tp_values'" + ((webstatic.getTimeprofiles[i].wed == 'true') ? 'checked' : '')  +"/>K</td>" ;
+			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='thu' name='tp_values'" + ((webstatic.getTimeprofiles[i].thu == 'true') ? 'checked' : '')  +"/>N</td>" ;
+			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='fri' name='tp_values'" + ((webstatic.getTimeprofiles[i].fri == 'true') ? 'checked' : '')  +"/>R</td>" ;
+			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='sat' name='tp_values'" + ((webstatic.getTimeprofiles[i].sat == 'true') ? 'checked' : '')  +"/>L</td>" ;
+			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='sun' name='tp_values'" + ((webstatic.getTimeprofiles[i].sun == 'true') ? 'checked' : '')  +"/>P</td>" ;
+			webstatic.timeprofiles_sub_page[j] += "<td><input type='button' value='Kustuta' onclick='timeprofile_delete_row(" + j + ")'/></td></tr>";
 			j++;
 		}
 	}
-	tmp_string += "</tr></table><hr></div>" +
-			"<div><input type='button' value='Lisa rida' onclick='timeprofile_add_row()'/></div>";
+	for(var i = 0; i < webstatic.timeprofiles_sub_page.length; i++){
+		tmp_string += webstatic.timeprofiles_sub_page[i];
+	}
+	tmp_string += "</tr></tbody></table><hr>" +
+			"<p><input type='button' value='Lisa rida' onclick='timeprofile_add_row()'/></p>" + 
+			"<p><input type='button' value='Salvesta' onclick='timeprofile_save()'/>" +
+			"<input type='button' value='Sulge' onclick='timeprofile_close()'/></p></form>";
 
 	document.getElementById("loadTimeprofile").innerHTML = tmp_string;
+}
+
+function timeprofile_delete_row(id){
+	var tmp_string ="";
+	webstatic.timeprofiles_sub_page[id] = "";
+	document.getElementById("tp_val").innerHTML = "";
+	tmp_string += "<table id='userTable' border='0'>";
+	for(var i = 0; i < webstatic.timeprofiles_sub_page.length; i++){
+                tmp_string += webstatic.timeprofiles_sub_page[i];
+        }
+	tmp_string += "</tr>";
+	document.getElementById("tp_val").innerHTML = tmp_string;
+}
+
+function timeprofile_add_row(id){
+	var i;
+	var tmp_string ="";
+	i = webstatic.timeprofiles_sub_page.length;
+	tmp_string = "<tr>";
+	tmp_string += "<td><input type='checkbox' value='mon' name='tp_values'/>E</td>";
+	tmp_string += "<td><input type='checkbox' value='tue' name='tp_values'/>T</td>";
+	tmp_string += "<td><input type='checkbox' value='wed' name='tp_values'/>K</td>";
+	tmp_string += "<td><input type='checkbox' value='thu' name='tp_values'/>N</td>";
+	tmp_string += "<td><input type='checkbox' value='fri' name='tp_values'/>R</td>";
+	tmp_string += "<td><input type='checkbox' value='sat' name='tp_values'/>L</td>";
+	tmp_string += "<td><input type='checkbox' value='sun' name='tp_values'/>P</td>";
+	tmp_string += "<td><input type='button' value='Kustuta' onclick='timeprofile_delete_row(" + i + ")'/></td></tr>";
+	webstatic.timeprofiles_sub_page[i] = tmp_string;
+	document.getElementById("tp_val").innerHTML = "";
+	tmp_string = "";
+	tmp_string += "<table id='userTable' border='0'>";
+	for(var i = 0; i < webstatic.timeprofiles_sub_page.length; i++){
+                tmp_string += webstatic.timeprofiles_sub_page[i];
+        }
+	document.getElementById("tp_val").innerHTML = tmp_string;
+}
+
+function timeprofile_close(){
+	timeprofiles_page();
 }
 
 /***********************************	Files	******************************************/

@@ -672,64 +672,116 @@ function timeprofile_edit(timeprofileID){
 	}
 	webstatic.timeprofiles_sub_page = [];
 	tmp_string += "<hr><table id='userTable' border='0'><tbody id='tp_val'>";
-	for(i = 0; i < webstatic.getTimeprofiles.length; i++){
-		if(webstatic.getTimeprofiles[i].timeprofileID == timeprofileID){
-			webstatic.timeprofiles_sub_page[j] = "<tr>";
-			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='mon' name='tp_values'" + ((webstatic.getTimeprofiles[i].mon == 'true') ? 'checked' : '')  +"/>E</td>" ;
-			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='tue' name='tp_values'" + ((webstatic.getTimeprofiles[i].tue == 'true') ? 'checked' : '')  +"/>T</td>" ;
-			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='wed' name='tp_values'" + ((webstatic.getTimeprofiles[i].wed == 'true') ? 'checked' : '')  +"/>K</td>" ;
-			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='thu' name='tp_values'" + ((webstatic.getTimeprofiles[i].thu == 'true') ? 'checked' : '')  +"/>N</td>" ;
-			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='fri' name='tp_values'" + ((webstatic.getTimeprofiles[i].fri == 'true') ? 'checked' : '')  +"/>R</td>" ;
-			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='sat' name='tp_values'" + ((webstatic.getTimeprofiles[i].sat == 'true') ? 'checked' : '')  +"/>L</td>" ;
-			webstatic.timeprofiles_sub_page[j] += "<td><input type='checkbox' value='sun' name='tp_values'" + ((webstatic.getTimeprofiles[i].sun == 'true') ? 'checked' : '')  +"/>P</td>" ;
-			webstatic.timeprofiles_sub_page[j] += "<td><input type='button' value='Kustuta' onclick='timeprofile_delete_row(" + j + ")'/></td></tr>";
-			j++;
-		}
-	}
-	for(var i = 0; i < webstatic.timeprofiles_sub_page.length; i++){
-		tmp_string += webstatic.timeprofiles_sub_page[i];
-	}
 	tmp_string += "</tr></tbody></table><hr>" +
 			"<p><input type='button' value='Lisa rida' onclick='timeprofile_add_row()'/></p>" + 
-			"<p><input type='button' value='Salvesta' onclick='timeprofile_save()'/>" +
+			"<p><input type='button' value='Salvesta' onclick='timeprofile_save(" + timeprofileID + ")'/>" +
 			"<input type='button' value='Sulge' onclick='timeprofile_close()'/></p></form>";
 
 	document.getElementById("loadTimeprofile").innerHTML = tmp_string;
+	for(i = 0; i < webstatic.getTimeprofiles.length; i++){
+		if(webstatic.getTimeprofiles[i].timeprofileID == timeprofileID){
+			timeprofile_add_row(i);
+		}	
+	}
 }
 
 function timeprofile_delete_row(id){
-	var tmp_string ="";
-	webstatic.timeprofiles_sub_page[id] = "";
-	document.getElementById("tp_val").innerHTML = "";
-	tmp_string += "<table id='userTable' border='0'>";
-	for(var i = 0; i < webstatic.timeprofiles_sub_page.length; i++){
-                tmp_string += webstatic.timeprofiles_sub_page[i];
-        }
-	tmp_string += "</tr>";
-	document.getElementById("tp_val").innerHTML = tmp_string;
+	var d = document.getElementById("tp_val");
+	if (d) {
+  		var d_node = document.getElementById(id);
+		if(d_node){
+			d.removeChild(d_node);
+		}
+	}
 }
 
 function timeprofile_add_row(id){
-	var i;
-	var tmp_string ="";
-	i = webstatic.timeprofiles_sub_page.length;
-	tmp_string = "<tr>";
-	tmp_string += "<td><input type='checkbox' value='mon' name='tp_values'/>E</td>";
-	tmp_string += "<td><input type='checkbox' value='tue' name='tp_values'/>T</td>";
-	tmp_string += "<td><input type='checkbox' value='wed' name='tp_values'/>K</td>";
-	tmp_string += "<td><input type='checkbox' value='thu' name='tp_values'/>N</td>";
-	tmp_string += "<td><input type='checkbox' value='fri' name='tp_values'/>R</td>";
-	tmp_string += "<td><input type='checkbox' value='sat' name='tp_values'/>L</td>";
-	tmp_string += "<td><input type='checkbox' value='sun' name='tp_values'/>P</td>";
-	tmp_string += "<td><input type='button' value='Kustuta' onclick='timeprofile_delete_row(" + i + ")'/></td></tr>";
-	webstatic.timeprofiles_sub_page[i] = tmp_string;
-	document.getElementById("tp_val").innerHTML = "";
-	tmp_string = "";
-	tmp_string += "<table id='userTable' border='0'>";
-	for(var i = 0; i < webstatic.timeprofiles_sub_page.length; i++){
-                tmp_string += webstatic.timeprofiles_sub_page[i];
-        }
-	document.getElementById("tp_val").innerHTML = tmp_string;
+	var weekdays = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+	var weekdayName = ["E", "T", "K", "N", "R", "L", "P"];
+	var a_tr = document.createElement("tr");
+	var b = []; 
+	var c = [];
+	var element=document.getElementById("tp_val");
+	if(element){
+		var x=document.getElementById("tp_val").getElementsByTagName("tr");
+		if(x.length != 0){
+			z = parseInt(x[(x.length - 1)].getAttribute("id"));
+			z = z + 1;
+		}else{
+			z = 0;
+		}
+		a_tr.setAttribute("id", z);
+		for(var i = 0; i < 7; i++){
+			b[i] = document.createElement("td");
+			c[i] = document.createElement("input");
+			c[i].setAttribute('type','checkbox');
+			c[i].setAttribute('value',weekdays[i]);
+			if(id != null){
+				if(webstatic.getTimeprofiles[id][weekdays[i]] == 'true'){
+					c[i].setAttribute('checked', true);
+				}
+			}
+			var c_txt=document.createTextNode(weekdayName[i]);
+			b[i].appendChild(c[i]);
+			b[i].appendChild(c_txt);
+			a_tr.appendChild(b[i]);
+		}
+
+		b[i] = document.createElement("td");
+		var e = document.createElement("select"); 
+		var g = []; 
+		for(var j = 0; j < 24; j++){
+			g[j] = document.createElement("option");   
+			g[j].setAttribute("value", j);
+			if(id != null){
+				if(webstatic.getTimeprofiles[id].hour == j){
+					g[j].setAttribute('selected', 'selected');
+				}
+			}
+			if(j < 10){
+				var g_txt = document.createTextNode("0" + j);
+			}else{
+				var g_txt = document.createTextNode(j);
+			}
+			g[j].appendChild(g_txt);
+                	e.appendChild(g[j]);
+		}
+                b[i].appendChild(e);
+		a_tr.appendChild(b[i]);
+		i++
+		
+		b[i] = document.createElement("td");
+		var h = document.createElement("select"); 
+		var hl = []; 
+		for(var j = 0; j < 60; j++){
+			hl[j] = document.createElement("option");   
+			hl[j].setAttribute("value", j);
+			if(id != null){
+				if(webstatic.getTimeprofiles[id].minute == j){
+					hl[j].setAttribute('selected', 'selected');
+				}
+			}
+			if(j < 10){
+				var hl_txt = document.createTextNode("0" + j);
+			}else{
+				var hl_txt = document.createTextNode(j);
+			}
+			hl[j].appendChild(hl_txt);
+                	h.appendChild(hl[j]);
+		}
+                b[i].appendChild(h);
+		a_tr.appendChild(b[i]);
+		i++
+	
+		b[i] = document.createElement("td");
+		var d = document.createElement("input");
+		d.setAttribute('type','button');
+		d.setAttribute('value','Kustuta');
+		d.setAttribute('onclick','timeprofile_delete_row(' + z + ')');
+		a_tr.appendChild(b[i]);
+		b[i].appendChild(d);
+		element.appendChild(a_tr);
+	}
 }
 
 function timeprofile_close(){
@@ -843,19 +895,21 @@ function sendDataToServer(){
 		}else{// code for IE6, IE5
 			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
 		}
-		xmlhttp.open("POST","server.php", false);
+		xmlhttp.open("POST","server.php", true);
 		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-		/*xmlhttp.onreadystatechange=function(){
+		xmlhttp.onreadystatechange=function(){
 			if (xmlhttp.readyState==4 && xmlhttp.status==200){
 				var response = xmlhttp.responseText;
 				parse(JSON.parse(response));        
 			}
-		}*/
+		}
 		xmlhttp.send(jsonString);
+		/*
 		if (xmlhttp.status==200){
 			var response = xmlhttp.responseText;
 			parse(JSON.parse(response));        
 		}
+		*/
 	}		
 }
 

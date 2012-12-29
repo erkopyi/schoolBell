@@ -864,8 +864,11 @@ function timeprofile_delete(id){
 	timeprofile_delete.timeprofileDelete = {};
 	timeprofile_delete.timeprofileDelete.id = id;
 	timeprofile_delete.timeprofileDelete.delete = 'true';
-	var timeprofileDelete = new sendDataToServer(); 	
-	timeprofileDelete.sendPostToServer(timeprofile_delete);
+	var temp = window.confirm("Kas olete kindel, et soovite kustutada ajaprofiili?");
+	if(temp){
+		var timeprofileDelete = new sendDataToServer(); 	
+		timeprofileDelete.sendPostToServer(timeprofile_delete);
+	}
 }
 
 function timeprofile_close(){

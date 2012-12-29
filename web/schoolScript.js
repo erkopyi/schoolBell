@@ -645,6 +645,7 @@ function show_timeprofile(){
 			if(temp_true){	
 				tmp_string += "<tr><td>" + webstatic.getTimeprofiles[j].name  + "</td>" +
 						"<td>" + "<input type='button' onclick='timeprofile_edit(" + webstatic.getTimeprofiles[j].timeprofileID + ")' value='Muuda' />" +
+						"<td>" + "<input type='button' onclick='timeprofile_delete(" + webstatic.getTimeprofiles[j].timeprofileID + ")' value='Kustuta' />" +
 						"</td></tr>";
 				temp_id.push(webstatic.getTimeprofiles[j].timeprofileID);
 			}
@@ -658,6 +659,21 @@ function show_timeprofile(){
 	}
 }
 
+function timeprofile_create_new(){
+	var tmp_string;
+	var j = 0;
+	tmp_string = "";
+	tmp_string += "<hr><FORM NAME='boxes'>" +
+                      "Ajaprofiili nimetus: <input id='timeprofile_name' type='text' />";
+	tmp_string += "<hr><table id='userTable' border='0'><tbody id='tp_val'>";
+	tmp_string += "</tr></tbody></table><hr>" +
+			"<p><input type='button' value='Lisa rida' onclick='timeprofile_add_row()'/></p>" + 
+			"<p><input type='button' value='Salvesta' onclick='timeprofile_save()'/>" +
+			"<input type='button' value='Sulge' onclick='timeprofile_close()'/></p></form>";
+	document.getElementById("loadTimeprofile").innerHTML = tmp_string;
+	timeprofile_add_row();
+}
+
 function timeprofile_edit(timeprofileID){
 	var tmp_string;
 	var j = 0;
@@ -666,7 +682,7 @@ function timeprofile_edit(timeprofileID){
 	for(var i = 0; i < webstatic.getTimeprofiles.length; i++){
 		if(webstatic.getTimeprofiles[i].timeprofileID == timeprofileID){
 			tmp_string += "<hr><FORM NAME='boxes'>" +
-                                        "<input id='" + j + "_name' type='text' value='" + webstatic.getTimeprofiles[i].name  + "'/>";
+                                        "Ajaprofiili nimetus: <input id='timeprofile_name' type='text' value='" + webstatic.getTimeprofiles[i].name  + "'/>";
 			break;
 		}
 	}
@@ -674,7 +690,7 @@ function timeprofile_edit(timeprofileID){
 	tmp_string += "<hr><table id='userTable' border='0'><tbody id='tp_val'>";
 	tmp_string += "</tr></tbody></table><hr>" +
 			"<p><input type='button' value='Lisa rida' onclick='timeprofile_add_row()'/></p>" + 
-			"<p><input type='button' value='Salvesta' onclick='timeprofile_save(" + timeprofileID + ")'/>" +
+			"<p><input type='button' value='Salvesta' onclick='timeprofile_edit_save(" + timeprofileID + ")'/>" +
 			"<input type='button' value='Sulge' onclick='timeprofile_close()'/></p></form>";
 
 	document.getElementById("loadTimeprofile").innerHTML = tmp_string;
@@ -782,6 +798,74 @@ function timeprofile_add_row(id){
 		b[i].appendChild(d);
 		element.appendChild(a_tr);
 	}
+}
+
+function timeprofile_edit_save(id){
+	var timeprofile_edit = {};
+	timeprofile_edit.timeprofileEdit = {};
+	timeprofile_edit.timeprofileEdit.id = id;
+	timeprofile_edit.timeprofileEdit.name = document.getElementById('timeprofile_name').value;
+	if(!timeprofile_edit.timeprofileEdit.name.length){
+		window.alert("Ajaprofiili nimi on sisetamata!");
+	}else{
+		timeprofile_edit.timeprofileEdit.configuration = [];
+		var x=document.getElementById("tp_val").getElementsByTagName("tr");
+		if(!x.length){
+			window.alert("Ühtegi rida pole sisestatud!");
+		}else{
+			for (var i = 0; i < x.length; i++){
+				var y=x[i].getElementsByTagName("input");
+				var w=x[i].getElementsByTagName("select");
+				timeprofile_edit.timeprofileEdit.configuration[i] = {};
+				for(var j = 0; j < (y.length - 1); j++){
+					var z = y[j].getAttribute("value");
+					timeprofile_edit.timeprofileEdit.configuration[i][z] = ((y[j].checked) ? 'true' : 'false');
+				}
+				timeprofile_edit.timeprofileEdit.configuration[i].hour = w[0].getElementsByTagName("option")[w[0].selectedIndex].value;
+				timeprofile_edit.timeprofileEdit.configuration[i].minute = w[1].getElementsByTagName("option")[w[1].selectedIndex].value;
+			}
+			var timeprofileEdit = new sendDataToServer(); 	
+			timeprofileEdit.sendPostToServer(timeprofile_edit);
+		}
+	}
+}
+
+function timeprofile_save(){
+	var timeprofile_save = {};
+	timeprofile_save.timeprofileSave = {};
+	timeprofile_save.timeprofileSave.name = document.getElementById('timeprofile_name').value;
+	if(!timeprofile_save.timeprofileSave.name.length){
+		window.alert("Ajaprofiili nimi on sisetamata!");
+	}else{
+		timeprofile_save.timeprofileSave.configuration = [];
+		var x=document.getElementById("tp_val").getElementsByTagName("tr");
+		if(!x.length){
+			window.alert("Ühtegi rida pole sisestatud!");
+		}else{
+			for (var i = 0; i < x.length; i++){
+				var y=x[i].getElementsByTagName("input");
+				var w=x[i].getElementsByTagName("select");
+				timeprofile_save.timeprofileSave.configuration[i] = {};
+				for(var j = 0; j < (y.length - 1); j++){
+					var z = y[j].getAttribute("value");
+					timeprofile_save.timeprofileSave.configuration[i][z] = ((y[j].checked) ? 'true' : 'false');
+				}
+				timeprofile_save.timeprofileSave.configuration[i].hour = w[0].getElementsByTagName("option")[w[0].selectedIndex].value;
+				timeprofile_save.timeprofileSave.configuration[i].minute = w[1].getElementsByTagName("option")[w[1].selectedIndex].value;
+			}
+			var timeprofileSave = new sendDataToServer(); 	
+			timeprofileSave.sendPostToServer(timeprofile_save);
+		}
+	}
+}
+
+function timeprofile_delete(id){
+	var timeprofile_delete = {};
+	timeprofile_delete.timeprofileDelete = {};
+	timeprofile_delete.timeprofileDelete.id = id;
+	timeprofile_delete.timeprofileDelete.delete = 'true';
+	var timeprofileDelete = new sendDataToServer(); 	
+	timeprofileDelete.sendPostToServer(timeprofile_delete);
 }
 
 function timeprofile_close(){

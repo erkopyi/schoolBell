@@ -74,6 +74,55 @@ if(isset($_POST['jsonString'])){
 		}
 		$dbhandle->close();
 	}
+	if(($json_parse->{'timeprofileEdit'}->{'configuration'}) && ($_SESSION['auth'] == 'true')){
+		$myerror;	
+		$dbhandle = new SQLite3('db_school.db');
+		$results = $dbhandle->query("delete from timeprofile where timeprofileID = {$json_parse->{'timeprofileEdit'}->{'id'}}");	
+		if($results){
+			$match = 1;
+			$dbhandle->close();
+			foreach($json_parse->timeprofileEdit->configuration as $a) {
+				if($a->mon && $a->tue && $a->wed && $a->thu && $a->fri && $a->sat && $a->sun){
+					$dbhandle = new SQLite3('db_school.db');
+					$dbhandle->exec("insert into timeprofile values (?,{$json_parse->{'timeprofileEdit'}->{'id'}},{$a->hour},{$a->minute},'{$a->mon}','{$a->tue}','{$a->wed}','{$a->thu}','{$a->fri}','{$a->sat}','{$a->sun}','{$json_parse->{'timeprofileEdit'}->{'name'}}')");
+					$dbhandle->close();
+				}
+			}
+			echo json_encode(array('timeprofileEdit' => 'true'));
+		}
+	}
+	if(($json_parse->{'timeprofileSave'}->{'configuration'}) && ($_SESSION['auth'] == 'true')){
+		$myerror;	
+		$dbhandle = new SQLite3('db_school.db');
+		$results = $dbhandle->query("SELECT * FROM timeprofile order by timeprofileID desc limit 1");	
+		if($results){
+			$match = 1;
+			$dbhandle->close();
+			$tmp_value = RandomNumber();
+			foreach($json_parse->timeprofileSave->configuration as $a) {
+				if($a->mon && $a->tue && $a->wed && $a->thu && $a->fri && $a->sat && $a->sun){
+					$dbhandle = new SQLite3('db_school.db');
+					$dbhandle->exec("insert into timeprofile values (?,{$tmp_value},{$a->hour},{$a->minute},'{$a->mon}','{$a->tue}','{$a->wed}','{$a->thu}','{$a->fri}','{$a->sat}','{$a->sun}','{$json_parse->{'timeprofileSave'}->{'name'}}')");
+					$dbhandle->close();
+				}
+			}
+			echo json_encode(array('timeprofileSave' => 'true'));
+		}
+	}
+	if(($json_parse->{'timeprofileDelete'}->{'delete'} == "true") && ($_SESSION['auth'] == 'true')){
+		if($json_parse->{'timeprofileDelete'}->{id}){
+			$myerror;	
+			$match = 1;
+			$dbhandle = new SQLite3('db_school.db');
+			$myerror = $dbhandle->exec("delete from  timeprofile  where timeprofileID = {$json_parse->{'timeprofileDelete'}->{'id'}}");
+			if(!$myerror){
+				echo json_encode(array('timeprofileDelete' => 'false'));
+			}else{
+				echo json_encode(array('timeprofileDelete' => 'true'));
+			}
+			$dbhandle->close();
+		}
+	}
 	if(($json_parse->{'queryTimeprofile'} == "true") && ($_SESSION['auth'] == 'true')){
 		$dbhandle = new SQLite3('db_school.db');
 		$results = $dbhandle->query("SELECT * FROM timeprofile order by timeprofileID, hour, minute");	
@@ -218,6 +267,40 @@ if(isset($_POST['jsonString'])){
 			}else{
 				echo json_encode(array('updatedToggleEnableRule' => 'true'));
 			}
+
+			
+			$results_1 = $dbhandle->query("SELECT * FROM rules where enabled = 'true'");
+                	if($results_1){
+				$handle = fopen('cron.txt', 'w');
+				while ($row_1 = $results_1->fetchArray()){
+					$results_2 = $dbhandle->query("SELECT * FROM timeprofile where timeprofileID = {$row_1['timeprofileID']}");
+					if($results_2){
+						while ($row_2 = $results_2->fetchArray()){
+							$tmp_string = "";
+							$tmp_string = $row_2['minute'] . " " . $row_2['hour'] . " * * ";
+							$tmp = 0;
+							if($row_2['sun'] == 'true') {$tmp_string = $tmp_string . "0"; $tmp = 1;}
+							if($row_2['mon'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "1"; $tmp = 1;}
+							if($row_2['tue'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "2"; $tmp = 1;}
+							if($row_2['wed'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "3"; $tmp = 1;}
+							if($row_2['thu'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "4"; $tmp = 1;}
+							if($row_2['fri'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "5"; $tmp = 1;}
+							if($row_2['sat'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "6"; $tmp = 1;}
+							$tmp_string = $tmp_string . " nohup mpg321 ../files/" . $row_1['track'] ." >/dev/null 2>&1 &\n";
+							if ((is_writable('cron.txt')) && ($tmp)) {
+								if (!$handle = fopen('cron.txt', 'a')) {
+								}else if (fwrite($handle, $tmp_string) === FALSE) {
+							    	}else{
+									shell_exec("crontab cron.txt");
+								}
+							    	fclose($handle);
+							} else {
+							   // echo "The file $filename is not writable";
+							}
+						}
+					}
+				}
+			}
 		}else{
 			echo json_encode(array('updatedToggleEnableRule' => 'false'));
 		}
@@ -237,6 +320,7 @@ if(isset($_POST['jsonString'])){
 					$_SESSION['userName'] = $row['name'];
 					echo json_encode(array('password' => 'ok', 'auth' => $_SESSION['auth']));
 					$i = 1;
+					break;
 				}			
 			}
 		}
@@ -330,6 +414,20 @@ Function RandomString(){
 	$randstring = '';
 	$random = '';
 	
+	for ($j = 0; $j < 10; $j++) {
+		    $randstring = "";
+		for ($i = 0; $i < 10; $i++) {
+		    $randstring = $characters[rand(0, (strlen($characters) -1 ))];
+		}
+		$random .=  $randstring;
+	}
+	return $random;
+}
+
+Function RandomNumber(){
+	$characters = "0123456789";
+	$randstring = '';
+	$random = '';
 	for ($j = 0; $j < 10; $j++) {
 		    $randstring = "";
 		for ($i = 0; $i < 10; $i++) {

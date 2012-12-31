@@ -124,8 +124,12 @@ function parse(json_response){
 	if(json_response.Rules){
 		rules_show_rules(json_response);
 	}
+	if((json_response.timeprofileSave == "true") || (json_response.timeprofileEdit == "true") || (json_response.timeprofileDelete == "true")){
+		timeprofiles_page();
+	}
 	if(json_response.timeprofiles){
 		parse_timeprofiles(json_response);
+		show_timeprofile();
 	}
 }
 
@@ -664,7 +668,7 @@ function timeprofile_create_new(){
 	var j = 0;
 	tmp_string = "";
 	tmp_string += "<hr><FORM NAME='boxes'>" +
-                      "Ajaprofiili nimetus: <input id='timeprofile_name' type='text' />";
+                      "Ajaprofiili nimetus: <input id='timeprofile_name' maxlength='24' type='text' />";
 	tmp_string += "<hr><table id='userTable' border='0'><tbody id='tp_val'>";
 	tmp_string += "</tr></tbody></table><hr>" +
 			"<p><input type='button' value='Lisa rida' onclick='timeprofile_add_row()'/></p>" + 
@@ -682,7 +686,7 @@ function timeprofile_edit(timeprofileID){
 	for(var i = 0; i < webstatic.getTimeprofiles.length; i++){
 		if(webstatic.getTimeprofiles[i].timeprofileID == timeprofileID){
 			tmp_string += "<hr><FORM NAME='boxes'>" +
-                                        "Ajaprofiili nimetus: <input id='timeprofile_name' type='text' value='" + webstatic.getTimeprofiles[i].name  + "'/>";
+                                        "Ajaprofiili nimetus: <input id='timeprofile_name' maxlength='24' type='text' value='" + webstatic.getTimeprofiles[i].name  + "'/>";
 			break;
 		}
 	}
@@ -826,6 +830,7 @@ function timeprofile_edit_save(id){
 			}
 			var timeprofileEdit = new sendDataToServer(); 	
 			timeprofileEdit.sendPostToServer(timeprofile_edit);
+			document.getElementById('loadTimeprofile').innerHTML = "Salvestan..";
 		}
 	}
 }
@@ -855,6 +860,7 @@ function timeprofile_save(){
 			}
 			var timeprofileSave = new sendDataToServer(); 	
 			timeprofileSave.sendPostToServer(timeprofile_save);
+			document.getElementById('loadTimeprofile').innerHTML = "Salvestan..";
 		}
 	}
 }

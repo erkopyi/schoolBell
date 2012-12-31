@@ -109,7 +109,7 @@ if(isset($_POST['jsonString'])){
 			echo json_encode(array('timeprofileSave' => 'true'));
 		}
 	}
-	if(($json_parse->{'timeprofileDelete'}->{'delete'} == "true") && ($_SESSION['auth'] == 'true')){
+	if(($json_parse->{'timeprofileDelete'}->{'dodelete'} == "true") && ($_SESSION['auth'] == 'true')){
 		if($json_parse->{'timeprofileDelete'}->{id}){
 			$myerror;	
 			$match = 1;
@@ -175,7 +175,7 @@ if(isset($_POST['jsonString'])){
 				$rules_array[$i]['remarks'] = $row['remarks'];
 				$i = $i + 1;
 			}
-			echo json_encode(array('Rules' => $rules_array));
+			echo json_encode(array('Rules' => $rules_array, 'rulesResponse' => 'true'));
 		}
 		$dbhandle->close();
 	}	
@@ -376,7 +376,7 @@ if(isset($_POST['jsonString'])){
 	if(($json_parse->{deleteFile}) && ($_SESSION['auth'] == 'true')){
 		if($json_parse->{deleteFile}->{filename}){
 			$match = 1;
-			$check = unlink("../files/" . $json_parse->{deleteFile}->{filename});
+			$check = unlink("../files/" . $json_parse->deleteFile->filename);
 			if($check){
 				echo json_encode(array('deleteFile' => 'true'));
 			}else{
@@ -392,6 +392,7 @@ if(isset($_POST['jsonString'])){
 	if(is_dir($uploaddir)){
 		if (is_uploaded_file($_FILES['upload_file']['tmp_name'])) {
 			$name = $_FILES['upload_file']['name'];
+			$name = str_replace(" ", "-", $name);
 			$uploaddir = $uploaddir . $name;
 			$result = move_uploaded_file($_FILES['upload_file']['tmp_name'],$uploaddir);
 			if ($result == 1){ 

@@ -121,7 +121,7 @@ function parse(json_response){
 	if(json_response.createRule == "true"){
 		rules_updated();
 	}
-	if(json_response.Rules){
+	if(json_response.rulesResponse){
 		rules_show_rules(json_response);
 	}
 	if((json_response.timeprofileSave == "true") || (json_response.timeprofileEdit == "true") || (json_response.timeprofileDelete == "true")){
@@ -454,14 +454,18 @@ function rules_show_rules(json_response){
 			"<td>Ajaprofiil</td>" +
 			"<td>Track</td>" +
 			"</td></tr>";
-		for(var i = 0; i < json_response.Rules.length; i++){
-			tmp_string += 
-				"<tr><td>" + json_response.Rules[i].name + "</td>" + 
-				"<td>" + json_response.Rules[i].timeprofileName + "</td>" +
-				"<td>" + json_response.Rules[i].track + "</td>" +
-				"<td>" + "<input type='button' onclick='rule_edit(" + json_response.Rules[i].id + ")' value='Muuda' /></td>" + 
-				"<td>" + "<input type='button' onclick='rule_delete(" + json_response.Rules[i].id + ")' value='Kustuta' />" + 
-				"</td></tr>";
+		if(json_response.Rules == null){
+
+		}else{
+			for(var i = 0; i < json_response.Rules.length; i++){
+				tmp_string += 
+					"<tr><td>" + json_response.Rules[i].name + "</td>" + 
+					"<td>" + json_response.Rules[i].timeprofileName + "</td>" +
+					"<td>" + json_response.Rules[i].track + "</td>" +
+					"<td>" + "<input type='button' onclick='rule_edit(" + json_response.Rules[i].id + ")' value='Muuda' /></td>" + 
+					"<td>" + "<input type='button' onclick='rule_delete(" + json_response.Rules[i].id + ")' value='Kustuta' />" + 
+					"</td></tr>";
+			}
 		}
 		tmp_string += "</table><hr>" + 
 				"<table id='createRulesTable' border='0'><tr>" +
@@ -869,7 +873,7 @@ function timeprofile_delete(id){
 	var timeprofile_delete = {};
 	timeprofile_delete.timeprofileDelete = {};
 	timeprofile_delete.timeprofileDelete.id = id;
-	timeprofile_delete.timeprofileDelete.delete = 'true';
+	timeprofile_delete.timeprofileDelete.dodelete = 'true';
 	var temp = window.confirm("Kas olete kindel, et soovite kustutada ajaprofiili?");
 	if(temp){
 		var timeprofileDelete = new sendDataToServer(); 	

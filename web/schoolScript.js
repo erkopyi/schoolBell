@@ -249,10 +249,10 @@ function edit_user(userID){
                                         "<td>Parool uuesti</td>" +
                                         "</td></tr>" +
 					"<td><input id='editEnabled' type='checkbox'" + enable_check +"/></td>" +
-					"<td><input id='editName' type='text' value='" + usersAll[i].name  + "'/></td>" +
-					"<td><input id='editUsername' value='" + usersAll[i].username + "' type='text'/></td>" +
-					"<td><input id='editPassword1'  type='password'/></td>" +
-					"<td><input id='editPassword2' type='password'/></td>" +
+					"<td><input size=16 id='editName' type='text' value='" + usersAll[i].name  + "'/></td>" +
+					"<td><input size=16 id='editUsername' value='" + usersAll[i].username + "' type='text'/></td>" +
+					"<td><input size=16 id='editPassword1'  type='password'/></td>" +
+					"<td><input size=16 id='editPassword2' type='password'/></td>" +
 					"</td></tr>" +
 					"</table><hr>" +
 					"<input type='button' value='Salvesta' onclick='user_save(" + usersAll[i].id + ")'/>" +
@@ -278,10 +278,10 @@ function create_user(){
 			"<td>Parool uuesti</td>" +
 			"</td></tr>" +
 			"<td><input id='createEnabled' type='checkbox' checked/></td>" +
-			"<td><input id='createName' type='text'/></td>" +
-			"<td><input id='createUsername'  type='text'/></td>" +
-			"<td><input id='createPassword1'  type='password'/></td>" +
-			"<td><input id='createPassword2' type='password'/></td>" +
+			"<td><input size=16 id='createName' type='text'/></td>" +
+			"<td><input size=16 id='createUsername'  type='text'/></td>" +
+			"<td><input size=16 id='createPassword1'  type='password'/></td>" +
+			"<td><input size=16 id='createPassword2' type='password'/></td>" +
 			"</td></tr>" +
 			"</table><hr>" +
 			"<input type='button' value='Salvesta' onclick='create_save()'/>" +
@@ -458,10 +458,32 @@ function rules_show_rules(json_response){
 
 		}else{
 			for(var i = 0; i < json_response.Rules.length; i++){
+				var trunc_a = json_response.Rules[i].name;
+				var trunc_b = json_response.Rules[i].timeprofileName;
+				var trunc_c = json_response.Rules[i].track;
+
+				if (trunc_a.length > 16){
+					trunc_a = "";
+					for(var s = 0; s < 16; s++){
+						trunc_a += json_response.Rules[i].name.charAt(s);
+					}
+				}
+				if (trunc_b.length > 16){
+					trunc_b = "";
+					for(var s = 0; s < 16; s++){
+						trunc_b += json_response.Rules[i].timeprofileName.charAt(s);
+					}
+				}
+				if (trunc_c.length > 32){
+					trunc_c = "";
+					for(var s = 0; s < 32; s++){
+						trunc_c += json_response.Rules[i].track.charAt(s);
+					}
+				}
 				tmp_string += 
-					"<tr><td>" + json_response.Rules[i].name + "</td>" + 
-					"<td>" + json_response.Rules[i].timeprofileName + "</td>" +
-					"<td>" + json_response.Rules[i].track + "</td>" +
+					"<tr><td>" +trunc_a + "</td>" + 
+					"<td>" + trunc_b + "</td>" +
+					"<td>" + trunc_c + "</td>" +
 					"<td>" + "<input type='button' onclick='rule_edit(" + json_response.Rules[i].id + ")' value='Muuda' /></td>" + 
 					"<td>" + "<input type='button' onclick='rule_delete(" + json_response.Rules[i].id + ")' value='Kustuta' />" + 
 					"</td></tr>";
@@ -486,8 +508,8 @@ function rule_edit(ruleID){
                                         "<td>Ajaprofiil</td>" +
                                         "<td>Track</td>" +
                                         "</td></tr>" +
-					"<td><input id='ruleName' type='text' value='" + webstatic.getRules[i].name  + "'/></td>" +
-					"<td> <select id=ruleTimeprofileID>";
+					"<td><input size=20 id='ruleName' type='text' value='" + webstatic.getRules[i].name  + "'/></td>" +
+					"<td> <select id=ruleTimeprofileID style='width:200px'>";
 			var temp_id = new Array();
 			var temp_true = 1;
 			for(var j = 0; j < webstatic.getTimeprofiles.length; j++){
@@ -504,7 +526,7 @@ function rule_edit(ruleID){
 				}
 				temp_true = 0;
 			}
-			tmp_string += "</select></td><td> <select id=ruleTrack>";
+			tmp_string += "</select></td><td> <select id=ruleTrack style='width:250px'>";
 			for(var j = 0; j < webstatic.getFiles.allFiles.length; j++){
 				tmp_string += "<option value='" + webstatic.getFiles.allFiles[j].filename  + "'>" + webstatic.getFiles.allFiles[j].filename  + "</option>";
 			}
@@ -526,8 +548,8 @@ function rule_create_new(){
 			"<td>Ajaprofiil</td>" +
 			"<td>Track</td>" +
 			"</td></tr>" +
-			"<td><input id='ruleName' type='text' value=''/></td>" +
-			"<td> <select id=ruleTimeprofileID>";
+			"<td><input size=20 id='ruleName' type='text' value=''/></td>" +
+			"<td> <select style='width:200px' id=ruleTimeprofileID>";
 	var temp_id = new Array();
 	var temp_true = 1;
 	for(var j = 0; j < webstatic.getTimeprofiles.length; j++){
@@ -544,7 +566,7 @@ function rule_create_new(){
 		}
 		temp_true = 0;
 	}
-	tmp_string += "</select></td><td> <select id=ruleTrack>";
+	tmp_string += "</select></td><td> <select style='width:250px' id=ruleTrack>";
 	for(var j = 0; j < webstatic.getFiles.allFiles.length; j++){
 		tmp_string += "<option value='" + webstatic.getFiles.allFiles[j].filename  + "'>" + webstatic.getFiles.allFiles[j].filename  + "</option>";
 	}
@@ -906,6 +928,7 @@ function load_files(json_response){
 			tmp_string += 
 				"</td><td>" + json_response.allFiles[i].filename + 
 				"</td><td>" +
+				"<input type='button' onclick='play_file(\"" + json_response.allFiles[i].filename + "\");' value='Kuula' />" + 
 				"<input type='button' onclick='delete_track_file(\"" + json_response.allFiles[i].filename + "\");' value='Kustuta' />" + 
 				"</td></tr>";
 		}
@@ -913,6 +936,19 @@ function load_files(json_response){
 		document.getElementById("loadFile").innerHTML = tmp_string;
 	}
 }
+
+function play_file(name){
+        var play = {};
+        var temp;
+        play.play = {};
+        play.play.filename = name;
+        temp = window.confirm("Kas olete kindel, et soovite kuulata lugu \n" + name + "!");
+        if(temp){
+                var Play = new sendDataToServer();
+                Play.sendPostToServer(play);
+        }
+}
+
 function delete_track_file(name){
 	var deleteFile = {};
 	var temp;

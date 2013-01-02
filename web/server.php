@@ -3,20 +3,22 @@ session_start();
 if(isset($_POST['jsonString'])){
 	$json_parse = json_decode($_POST['jsonString']);
 	$match = 0;
-	if($json_parse->{connection} == "getStatus"){
-		$match = 1;
-		if(isset($_SESSION['connection'])){
-			$_SESSION['nonce'] = RandomString(); 
-			echo json_encode(array('connection' => true, 'auth' => $_SESSION['auth'], 'nonce' => $_SESSION['nonce']));
-		}else{
-			$_SESSION['auth'] = "false";
-			$_SESSION['nonce'] = RandomString(); 
-			$_SESSION['connection'] = true;
-			echo json_encode(array('connection' => false, 'auth' => $_SESSION['auth'], 'nonce' => $_SESSION['nonce']));
+	if(isset($json_parse->connection)){
+		if($json_parse->connection == "getStatus"){
+			$match = 1;
+			if(isset($_SESSION['connection'])){
+				$_SESSION['nonce'] = RandomString(); 
+				echo json_encode(array('connection' => true, 'auth' => $_SESSION['auth'], 'nonce' => $_SESSION['nonce']));
+			}else{
+				$_SESSION['auth'] = "false";
+				$_SESSION['nonce'] = RandomString(); 
+				$_SESSION['connection'] = true;
+				echo json_encode(array('connection' => false, 'auth' => $_SESSION['auth'], 'nonce' => $_SESSION['nonce']));
+			}
 		}
 	}
 	//CREATE TABLE rules(id INTEGER PRIMARY KEY, enabled boolean, name TEXT, timeprofileID INTEGER, track TEXT, remarks TEXT);
-	if(($json_parse->{'updateRule'}) && ($_SESSION['auth'] == 'true')){
+	if((isset($json_parse->updateRule)) && ($_SESSION['auth'] == 'true')){
 		$myerror;	
 		$match = 1;
 		$dbhandle = new SQLite3('db_school.db');
@@ -29,7 +31,7 @@ if(isset($_POST['jsonString'])){
 		}
 		$dbhandle->close();
 	}
-	if(($json_parse->{'deleteRule'}) && ($_SESSION['auth'] == 'true')){
+	if((isset($json_parse->deleteRule)) && ($_SESSION['auth'] == 'true')){
 		$myerror;	
 		$match = 1;
 		$dbhandle = new SQLite3('db_school.db');
@@ -41,7 +43,7 @@ if(isset($_POST['jsonString'])){
 		}
 		$dbhandle->close();
 	}
-	if(($json_parse->{'createRule'}) && ($_SESSION['auth'] == 'true')){
+	if((isset($json_parse->createRule)) && ($_SESSION['auth'] == 'true')){
 		$myerror;	
 		$match = 1;
 		$dbhandle = new SQLite3('db_school.db');
@@ -54,27 +56,29 @@ if(isset($_POST['jsonString'])){
 		}
 		$dbhandle->close();
 	}
-	if(($json_parse->{'getRules'} == "true") && ($_SESSION['auth'] == 'true')){
-		$dbhandle = new SQLite3('db_school.db');
-		$results = $dbhandle->query("SELECT * FROM rules");	
-		if($results){
-			$match = 1;
-			$rules_array = [];
-			$i = 0;
-                        while ($row = $results->fetchArray()){
-				$rules_array[$i]['name'] = $row['name'];
-				$rules_array[$i]['id'] = $row['id'];
-				$rules_array[$i]['enabled'] = $row['enabled'];
-				$rules_array[$i]['track'] = $row['track'];
-				$rules_array[$i]['remarks'] = $row['remarks'];
-				$rules_array[$i]['timeprofileID'] = $row['timeprofileID'];
-				$i++;
+	if((isset($json_parse->getRules)) && ($_SESSION['auth'] == 'true')){
+		if($json_parse->getRules == "true"){
+			$dbhandle = new SQLite3('db_school.db');
+			$results = $dbhandle->query("SELECT * FROM rules");	
+			if($results){
+				$match = 1;
+				$rules_array = [];
+				$i = 0;
+				while ($row = $results->fetchArray()){
+					$rules_array[$i]['name'] = $row['name'];
+					$rules_array[$i]['id'] = $row['id'];
+					$rules_array[$i]['enabled'] = $row['enabled'];
+					$rules_array[$i]['track'] = $row['track'];
+					$rules_array[$i]['remarks'] = $row['remarks'];
+					$rules_array[$i]['timeprofileID'] = $row['timeprofileID'];
+					$i++;
+				}
+				echo json_encode(array('allRules' => $rules_array));
 			}
-			echo json_encode(array('allRules' => $rules_array));
+			$dbhandle->close();
 		}
-		$dbhandle->close();
 	}
-	if(($json_parse->{'timeprofileEdit'}->{'configuration'}) && ($_SESSION['auth'] == 'true')){
+	if((isset($json_parse->timeprofileEdit->configuration)) && ($_SESSION['auth'] == 'true')){
 		$myerror;	
 		$dbhandle = new SQLite3('db_school.db');
 		$results = $dbhandle->query("delete from timeprofile where timeprofileID = {$json_parse->{'timeprofileEdit'}->{'id'}}");	
@@ -91,7 +95,7 @@ if(isset($_POST['jsonString'])){
 			echo json_encode(array('timeprofileEdit' => 'true'));
 		}
 	}
-	if(($json_parse->{'timeprofileSave'}->{'configuration'}) && ($_SESSION['auth'] == 'true')){
+	if((isset($json_parse->timeprofileSave->configuration)) && ($_SESSION['auth'] == 'true')){
 		$myerror;	
 		$dbhandle = new SQLite3('db_school.db');
 		$results = $dbhandle->query("SELECT * FROM timeprofile order by timeprofileID desc limit 1");	
@@ -109,95 +113,103 @@ if(isset($_POST['jsonString'])){
 			echo json_encode(array('timeprofileSave' => 'true'));
 		}
 	}
-	if(($json_parse->{'timeprofileDelete'}->{'dodelete'} == "true") && ($_SESSION['auth'] == 'true')){
-		if($json_parse->{'timeprofileDelete'}->{id}){
-			$myerror;	
-			$match = 1;
+	if((isset($json_parse->timeprofileDelete->dodelete)) && ($_SESSION['auth'] == 'true')){
+		if($json_parse->timeprofileDelete->dodelete == "true"){
+			if($json_parse->timeprofileDelete->id){
+				$myerror;	
+				$match = 1;
+				$dbhandle = new SQLite3('db_school.db');
+				$myerror = $dbhandle->exec("delete from  timeprofile  where timeprofileID = {$json_parse->{'timeprofileDelete'}->{'id'}}");
+				if(!$myerror){
+					echo json_encode(array('timeprofileDelete' => 'false'));
+				}else{
+					echo json_encode(array('timeprofileDelete' => 'true'));
+				}
+				$dbhandle->close();
+			}
+		}
+	}
+	if((isset($json_parse->queryTimeprofile)) && ($_SESSION['auth'] == 'true')){
+		if($json_parse->queryTimeprofile == "true"){
 			$dbhandle = new SQLite3('db_school.db');
-			$myerror = $dbhandle->exec("delete from  timeprofile  where timeprofileID = {$json_parse->{'timeprofileDelete'}->{'id'}}");
-			if(!$myerror){
-				echo json_encode(array('timeprofileDelete' => 'false'));
-			}else{
-				echo json_encode(array('timeprofileDelete' => 'true'));
+			$results = $dbhandle->query("SELECT * FROM timeprofile order by timeprofileID, hour, minute");	
+			if($results){
+				$match = 1;
+				$timeprofile_array = [];
+				$i = 0;
+				while ($row = $results->fetchArray()){
+					$timeprofile_array[$i]['name'] = $row['name'];
+					$timeprofile_array[$i]['id'] = $row['id'];
+					$timeprofile_array[$i]['timeprofileID'] = $row['timeprofileID'];
+					$timeprofile_array[$i]['hour'] = $row['hour'];
+					$timeprofile_array[$i]['minute'] = $row['minute'];
+					$timeprofile_array[$i]['mon'] = $row['mon'];
+					$timeprofile_array[$i]['tue'] = $row['tue'];
+					$timeprofile_array[$i]['wed'] = $row['wed'];
+					$timeprofile_array[$i]['thu'] = $row['thu'];
+					$timeprofile_array[$i]['fri'] = $row['fri'];
+					$timeprofile_array[$i]['sat'] = $row['sat'];
+					$timeprofile_array[$i]['sun'] = $row['sun'];
+					$i++;
+				}
+				echo json_encode(array('timeprofiles' => $timeprofile_array));
 			}
 			$dbhandle->close();
 		}
 	}
-	if(($json_parse->{'queryTimeprofile'} == "true") && ($_SESSION['auth'] == 'true')){
-		$dbhandle = new SQLite3('db_school.db');
-		$results = $dbhandle->query("SELECT * FROM timeprofile order by timeprofileID, hour, minute");	
-		if($results){
-			$match = 1;
-			$timeprofile_array = [];
-			$i = 0;
-                        while ($row = $results->fetchArray()){
-				$timeprofile_array[$i]['name'] = $row['name'];
-				$timeprofile_array[$i]['id'] = $row['id'];
-				$timeprofile_array[$i]['timeprofileID'] = $row['timeprofileID'];
-				$timeprofile_array[$i]['hour'] = $row['hour'];
-				$timeprofile_array[$i]['minute'] = $row['minute'];
-				$timeprofile_array[$i]['mon'] = $row['mon'];
-				$timeprofile_array[$i]['tue'] = $row['tue'];
-				$timeprofile_array[$i]['wed'] = $row['wed'];
-				$timeprofile_array[$i]['thu'] = $row['thu'];
-				$timeprofile_array[$i]['fri'] = $row['fri'];
-				$timeprofile_array[$i]['sat'] = $row['sat'];
-				$timeprofile_array[$i]['sun'] = $row['sun'];
-				$i++;
-			}
-			echo json_encode(array('timeprofiles' => $timeprofile_array));
-		}
-		$dbhandle->close();
-	}
-	if(($json_parse->{'queryRules'} == "true") && ($_SESSION['auth'] == 'true')){
-		$dbhandle = new SQLite3('db_school.db');
-		$results = $dbhandle->query("SELECT * FROM rules");
-		$rules_array[$i];
-		if($results){
-			$rules_profile = "";
-			$i = 0;
-			$match = 1;
-                        while ($row = $results->fetchArray()){
-				$rules_array[$i]["name"] = $row['name'];
+	if((isset($json_parse->queryRules)) && ($_SESSION['auth'] == 'true')){
+		if($json_parse->queryRules == "true"){
+			$dbhandle = new SQLite3('db_school.db');
+			$results = $dbhandle->query("SELECT * FROM rules");
+			$rules_array = [];
+			if($results){
+				$rules_profile = "";
+				$i = 0;
+				$match = 1;
+				while ($row = $results->fetchArray()){
+					$rules_array[$i]["name"] = $row['name'];
 
-				$res_time = $dbhandle->query("SELECT * FROM timeprofile where timeprofileID = {$row['timeprofileID']}");	
-				if($res_time){
-					while ($row1 = $res_time->fetchArray()){
-						$rules_profile = $row1['name'];
-						$rules_array[$i]["timeprofileName"] = $rules_profile;
-						break;
-					}	
+					$res_time = $dbhandle->query("SELECT * FROM timeprofile where timeprofileID = {$row['timeprofileID']}");	
+					if($res_time){
+						while ($row1 = $res_time->fetchArray()){
+							$rules_profile = $row1['name'];
+							$rules_array[$i]["timeprofileName"] = $rules_profile;
+							break;
+						}	
+					}
+					$rules_array[$i]['timeprofileID'] = $row['timeprofileID'];
+					$rules_array[$i]['id'] = $row['id'];
+					$rules_array[$i]['enabled'] = $row['enabled'];
+					$rules_array[$i]['track'] = $row['track'];
+					$rules_array[$i]['remarks'] = $row['remarks'];
+					$i = $i + 1;
 				}
-				$rules_array[$i]['timeprofileID'] = $row['timeprofileID'];
-				$rules_array[$i]['id'] = $row['id'];
-				$rules_array[$i]['enabled'] = $row['enabled'];
-				$rules_array[$i]['track'] = $row['track'];
-				$rules_array[$i]['remarks'] = $row['remarks'];
-				$i = $i + 1;
+				echo json_encode(array('Rules' => $rules_array, 'rulesResponse' => 'true'));
 			}
-			echo json_encode(array('Rules' => $rules_array, 'rulesResponse' => 'true'));
+			$dbhandle->close();
 		}
-		$dbhandle->close();
 	}	
-	if(($json_parse->{'getUsers'} == "true") && ($_SESSION['auth'] == 'true')){
-		$dbhandle = new SQLite3('db_school.db');
-		$results = $dbhandle->query("SELECT * FROM users");	
-		if($results){
-			$match = 1;
-			$users_array = [];
-			$i = 0;
-                        while ($row = $results->fetchArray()){
-				$users_array[$i]['name'] = $row['name'];
-				$users_array[$i]['id'] = $row['id'];
-				$users_array[$i]['enabled'] = $row['enabled'];
-				$users_array[$i]['username'] = $row['username'];
-				$i++;
+	if((isset($json_parse->getUsers )) && ($_SESSION['auth'] == 'true')){
+		if($json_parse->getUsers == "true"){
+			$dbhandle = new SQLite3('db_school.db');
+			$results = $dbhandle->query("SELECT * FROM users");	
+			if($results){
+				$match = 1;
+				$users_array = [];
+				$i = 0;
+				while ($row = $results->fetchArray()){
+					$users_array[$i]['name'] = $row['name'];
+					$users_array[$i]['id'] = $row['id'];
+					$users_array[$i]['enabled'] = $row['enabled'];
+					$users_array[$i]['username'] = $row['username'];
+					$i++;
+				}
+				echo json_encode(array('allUsers' => $users_array));
 			}
-			echo json_encode(array('allUsers' => $users_array));
+			$dbhandle->close();
 		}
-		$dbhandle->close();
 	}
-	if(($json_parse->{'deleteUser'}) && ($_SESSION['auth'] == 'true')){
+	if((isset($json_parse->deleteUser)) && ($_SESSION['auth'] == 'true')){
 		$myerror;	
 		$match = 1;
 		$dbhandle = new SQLite3('db_school.db');
@@ -209,7 +221,7 @@ if(isset($_POST['jsonString'])){
 		}
 		$dbhandle->close();
 	}
-	if(($json_parse->{'updateUser'}) && ($_SESSION['auth'] == 'true')){
+	if((isset($json_parse->updateUser)) && ($_SESSION['auth'] == 'true')){
 		$myerror;	
 		$match = 1;
 		$dbhandle = new SQLite3('db_school.db');
@@ -227,12 +239,12 @@ if(isset($_POST['jsonString'])){
 		}
 		$dbhandle->close();
 	}
-	if(($json_parse->{'createUser'}) && ($_SESSION['auth'] == 'true')){
+	if((isset($json_parse->createUser)) && ($_SESSION['auth'] == 'true')){
 		$myerror;	
 		$match = 1;
 		$dbhandle = new SQLite3('db_school.db');
 		$enabled;
-		if($json_parse->{'createUser'}->{'enabled'} == true){
+		if($json_parse->createUser->enabled == true){
 			$enabled = 'true';
 		}else{
 			$enabled = 'false';
@@ -246,7 +258,7 @@ if(isset($_POST['jsonString'])){
 		$dbhandle->close();
 	}
 	
-	if(($json_parse->{'toggleEnableRule'}) && ($_SESSION['auth'] == 'true')){
+	if((isset($json_parse->toggleEnableRule)) && ($_SESSION['auth'] == 'true')){
 		$myerror;
 		$match = 1;
 		$status = "";
@@ -261,7 +273,7 @@ if(isset($_POST['jsonString'])){
 					$status = 'true';
 				}
 			}
-			$myerror = $dbhandle->exec("update rules set enabled = '$status' where id = {$json_parse->{'toggleEnableRule'}->{'id'}}");
+			$myerror = $dbhandle->exec("update rules set enabled = '$status' where id = {$json_parse->toggleEnableRule->id}");
 			if(!$myerror){
 				echo json_encode(array('updatedToggleEnableRule' => 'false'));
 			}else{
@@ -288,7 +300,7 @@ if(isset($_POST['jsonString'])){
 							if($row_2['thu'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "4"; $tmp = 1;}
 							if($row_2['fri'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "5"; $tmp = 1;}
 							if($row_2['sat'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "6"; $tmp = 1;}
-							$tmp_string = $tmp_string . " /data/projects/schoolBell/web/start_track.sh " . $row_1['track'] . "\n";
+							$tmp_string = $tmp_string . " /data/projects/schoolBell/web/start_track.sh '" . $row_1['track'] . "'\n";
 							if ((is_writable('cron.txt')) && ($tmp)) {
 								if (!$handle = fopen('cron.txt', 'a')) {
 								}else if (fwrite($handle, $tmp_string) === FALSE) {
@@ -311,7 +323,12 @@ if(isset($_POST['jsonString'])){
 		}
 		$dbhandle->close();
 	}
-	if(($json_parse->{'password'}) && (isset($_SESSION['nonce']))){
+	if((isset($json_parse->play->filename)) && ($_SESSION['auth'] == 'true')){
+		$match = 1;
+		shell_exec("./start_track.sh '" . $json_parse->play->filename . "'");
+		echo json_encode(array('play' => 'true'));
+	}
+	if((isset($json_parse->password)) && (isset($_SESSION['nonce']))){
 		$i = 0;
 		$match = 1;
 		$dbhandle = new SQLite3('db_school.db');
@@ -319,7 +336,7 @@ if(isset($_POST['jsonString'])){
 		if($results){
                         while ($row = $results->fetchArray()){
 				$server_password = hash_hmac ( "sha1", $row['password'] , $_SESSION['nonce']);
-				if(($server_password == $json_parse->{password}) && ($row['enabled'] == 'true')){
+				if(($server_password == $json_parse->password) && ($row['enabled'] == 'true')){
 					$_SESSION['auth'] = "true";
 					$_SESSION['userID'] = $row['id'];
 					$_SESSION['userName'] = $row['name'];
@@ -334,15 +351,15 @@ if(isset($_POST['jsonString'])){
 		}
 		$dbhandle->close();
 	}
-	if(($json_parse->{logout}) && (isset($_SESSION['auth']))){
-		if($json_parse->{logout} == 'true'){
+	if((isset($json_parse->logout)) && (isset($_SESSION['auth']))){
+		if($json_parse->logout == 'true'){
 			$match = 1;
 			session_destroy();
 			echo json_encode(array('restart' => 'true'));
 		}
 	}
-	if(($json_parse->{rpistatus}) && ($_SESSION['auth'] == 'true')){
-		if($json_parse->{rpistatus} == 'true'){
+	if((isset($json_parse->rpistatus)) && (isset($_SESSION['auth']))){
+		if(($json_parse->rpistatus == 'true') && ($_SESSION['auth'] == 'true')){
 			$match = 1;
 			$rpi_load = shell_exec("cat /proc/loadavg | awk '{print $1 }'");
 			$rpi_date = date('Y-m-d H:i:s');
@@ -357,12 +374,12 @@ if(isset($_POST['jsonString'])){
 			}else{
 				$paev = " päeva";
 			}
-			$rpi_uptime = $hours . " tundi ja " . $days . $paev; 
+			$rpi_uptime = $days . $paev . " ja " . $hours . "tundi"; 
 			echo json_encode(array('rpiDate' => $rpi_date, 'rpiFreeMemory' => $rpi_freeMemory, 'rpiUptime' => $rpi_uptime, 'rpiLoad' => $rpi_load));
 		}
 	}
-	if(($json_parse->{getFiles}) && ($_SESSION['auth'] == 'true')){
-		if($json_parse->{getFiles} == 'true'){
+	if((isset($json_parse->getFiles)) && ($_SESSION['auth'] == 'true')){
+		if($json_parse->getFiles == 'true'){
 			if ($handle = opendir('../files/')){
 				$match = 1;
 				$allFiles = [];
@@ -378,8 +395,8 @@ if(isset($_POST['jsonString'])){
     			closedir($handle);
 		}
 	}
-	if(($json_parse->{deleteFile}) && ($_SESSION['auth'] == 'true')){
-		if($json_parse->{deleteFile}->{filename}){
+	if((isset($json_parse->deleteFile)) && ($_SESSION['auth'] == 'true')){
+		if($json_parse->deleteFile->filename){
 			$match = 1;
 			$check = unlink("../files/" . $json_parse->deleteFile->filename);
 			if($check){
@@ -397,7 +414,6 @@ if(isset($_POST['jsonString'])){
 	if(is_dir($uploaddir)){
 		if (is_uploaded_file($_FILES['upload_file']['tmp_name'])) {
 			$name = $_FILES['upload_file']['name'];
-			$name = str_replace(" ", "-", $name);
 			$uploaddir = $uploaddir . $name;
 			$result = move_uploaded_file($_FILES['upload_file']['tmp_name'],$uploaddir);
 			if ($result == 1){ 

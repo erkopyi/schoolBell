@@ -249,10 +249,10 @@ function edit_user(userID){
                                         "<td>Parool uuesti</td>" +
                                         "</td></tr>" +
 					"<td><input id='editEnabled' type='checkbox'" + enable_check +"/></td>" +
-					"<td><input size=16 id='editName' type='text' value='" + usersAll[i].name  + "'/></td>" +
-					"<td><input size=16 id='editUsername' value='" + usersAll[i].username + "' type='text'/></td>" +
-					"<td><input size=16 id='editPassword1'  type='password'/></td>" +
-					"<td><input size=16 id='editPassword2' type='password'/></td>" +
+					"<td><input Style='width:125px' id='editName' type='text' value='" + usersAll[i].name  + "'/></td>" +
+					"<td><input Style='width:125px' id='editUsername' value='" + usersAll[i].username + "' type='text'/></td>" +
+					"<td><input Style='width:125px' id='editPassword1'  type='password'/></td>" +
+					"<td><input Style='width:125px' id='editPassword2' type='password'/></td>" +
 					"</td></tr>" +
 					"</table><hr>" +
 					"<input type='button' value='Salvesta' onclick='user_save(" + usersAll[i].id + ")'/>" +
@@ -278,10 +278,10 @@ function create_user(){
 			"<td>Parool uuesti</td>" +
 			"</td></tr>" +
 			"<td><input id='createEnabled' type='checkbox' checked/></td>" +
-			"<td><input size=16 id='createName' type='text'/></td>" +
-			"<td><input size=16 id='createUsername'  type='text'/></td>" +
-			"<td><input size=16 id='createPassword1'  type='password'/></td>" +
-			"<td><input size=16 id='createPassword2' type='password'/></td>" +
+			"<td><input Style='width:125px' id='createName' type='text'/></td>" +
+			"<td><input Style='width:125px' id='createUsername'  type='text'/></td>" +
+			"<td><input Style='width:125px' id='createPassword1'  type='password'/></td>" +
+			"<td><input Style='width:125px' id='createPassword2' type='password'/></td>" +
 			"</td></tr>" +
 			"</table><hr>" +
 			"<input type='button' value='Salvesta' onclick='create_save()'/>" +
@@ -461,6 +461,9 @@ function rules_show_rules(json_response){
 				var trunc_a = json_response.Rules[i].name;
 				var trunc_b = json_response.Rules[i].timeprofileName;
 				var trunc_c = json_response.Rules[i].track;
+				if (trunc_a == null) trunc_a = "undefined";
+				if (trunc_b == null) trunc_b = "undefined";
+				if (trunc_c == null) trunc_c = "undefined";
 
 				if (trunc_a.length > 16){
 					trunc_a = "";
@@ -468,15 +471,15 @@ function rules_show_rules(json_response){
 						trunc_a += json_response.Rules[i].name.charAt(s);
 					}
 				}
-				if (trunc_b.length > 16){
+				if (trunc_b.length > 15){
 					trunc_b = "";
-					for(var s = 0; s < 16; s++){
+					for(var s = 0; s < 15; s++){
 						trunc_b += json_response.Rules[i].timeprofileName.charAt(s);
 					}
 				}
-				if (trunc_c.length > 32){
+				if (trunc_c.length > 30){
 					trunc_c = "";
-					for(var s = 0; s < 32; s++){
+					for(var s = 0; s < 30; s++){
 						trunc_c += json_response.Rules[i].track.charAt(s);
 					}
 				}
@@ -508,7 +511,7 @@ function rule_edit(ruleID){
                                         "<td>Ajaprofiil</td>" +
                                         "<td>Track</td>" +
                                         "</td></tr>" +
-					"<td><input size=20 id='ruleName' type='text' value='" + webstatic.getRules[i].name  + "'/></td>" +
+					"<td><input Style='width:150px' id='ruleName' type='text' value='" + webstatic.getRules[i].name  + "'/></td>" +
 					"<td> <select id=ruleTimeprofileID style='width:200px'>";
 			var temp_id = new Array();
 			var temp_true = 1;
@@ -548,7 +551,7 @@ function rule_create_new(){
 			"<td>Ajaprofiil</td>" +
 			"<td>Track</td>" +
 			"</td></tr>" +
-			"<td><input size=20 id='ruleName' type='text' value=''/></td>" +
+			"<td><input Style='width:150px' id='ruleName' type='text' value=''/></td>" +
 			"<td> <select style='width:200px' id=ruleTimeprofileID>";
 	var temp_id = new Array();
 	var temp_true = 1;
@@ -694,7 +697,7 @@ function timeprofile_create_new(){
 	var j = 0;
 	tmp_string = "";
 	tmp_string += "<hr><FORM NAME='boxes'>" +
-                      "Ajaprofiili nimetus: <input id='timeprofile_name' maxlength='24' type='text' />";
+                      "Ajaprofiili nimetus: <input id='timeprofile_name' maxlength='24' Style='width:200px' type='text' />";
 	tmp_string += "<hr><table id='userTable' border='0'><tbody id='tp_val'>";
 	tmp_string += "</tr></tbody></table><hr>" +
 			"<p><input type='button' value='Lisa rida' onclick='timeprofile_add_row()'/></p>" + 
@@ -712,7 +715,7 @@ function timeprofile_edit(timeprofileID){
 	for(var i = 0; i < webstatic.getTimeprofiles.length; i++){
 		if(webstatic.getTimeprofiles[i].timeprofileID == timeprofileID){
 			tmp_string += "<hr><FORM NAME='boxes'>" +
-                                        "Ajaprofiili nimetus: <input id='timeprofile_name' maxlength='24' type='text' value='" + webstatic.getTimeprofiles[i].name  + "'/>";
+                                        "Ajaprofiili nimetus: <input id='timeprofile_name' maxlength='24' type='text' Style='width:200px' value='" + webstatic.getTimeprofiles[i].name  + "'/>";
 			break;
 		}
 	}

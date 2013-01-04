@@ -1,4 +1,7 @@
-html, body{margin:0;padding:0;border:0;height:100%;width:100%;}
+html, body{
+	margin:0;padding:0;border:0;height:100%;width:100%;
+	font-family: tahoma,arial,Kalimati,Helvetica,"Lucida Grande",sans-serif;
+}
 /*html {background:#aaaaaa;}*/
 #login li{
 	border:0; margin:0;padding:0; list-style:none;
@@ -48,12 +51,14 @@ html, body{margin:0;padding:0;border:0;height:100%;width:100%;}
 }
 
 .right_header{
+	font-family: tahoma,arial,Kalimati,Helvetica,"Lucida Grande",sans-serif;
 	overflow: auto;
 	overflow-x: hidden;
 	width: 660px;
 	height: 420px;
 	margin-left: 140px;
 	margin-top: -420px;
+	font-size: 16px;
 }
 
 .bottom_header{

@@ -802,7 +802,7 @@ function timeprofile_add_row(id){
 		b[i] = document.createElement("td");
 		var h = document.createElement("select"); 
 		var hl = []; 
-		for(var j = 0; j < 60; j++){
+		for(var j = 0; j < 60; j+=5){
 			hl[j] = document.createElement("option");   
 			hl[j].setAttribute("value", j);
 			if(id != null){
@@ -945,7 +945,7 @@ function play_file(name){
         var temp;
         play.play = {};
         play.play.filename = name;
-        temp = window.confirm("Kas olete kindel, et soovite kuulata lugu \n" + name + "!");
+        temp = window.confirm("Kas olete kindel, et soovite kuulata lugu \n" + name + "!" + "\nLugu esitatakse koolikella süsteemis!");
         if(temp){
                 var Play = new sendDataToServer();
                 Play.sendPostToServer(play);

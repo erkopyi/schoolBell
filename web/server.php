@@ -325,7 +325,7 @@ if(isset($_POST['jsonString'])){
 	}
 	if((isset($json_parse->play->filename)) && ($_SESSION['auth'] == 'true')){
 		$match = 1;
-		shell_exec("./start_track.sh '" . $json_parse->play->filename . "'");
+		shell_exec("/data/projects/schoolBell/web/start_track.sh '" . $json_parse->play->filename . "'");
 		echo json_encode(array('play' => 'true'));
 	}
 	if((isset($json_parse->password)) && (isset($_SESSION['nonce']))){

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Koolikella süsteem</title>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+</head>
+<body>
+	<div>
+		<hr></hr>
+		<table border='0'>
+			<tr>
+			<td><h2><strong>SchoolBell Service</strong></h2><td>
+		</tr>
+		<tr>
+			<td><input type='button' onclick='get_log()' value='Get Sys Log'></td>
+			<td><input type='button' onclick='update_ver()' value='Update Version'></td>
+			<td><input type='button' onclick='internet_check()' value='Ping internet'></td>
+		</tr>
+		
+	</table>
+</div>
+<hr>
+<div id="status"></div>
+</body>
+</html>
+
+<script>
+function internet_check(){
+	var int_ernet = new sendDataToServer();
+	int_ernet.sendPostToServer( {"pingInternet":{"ping":true}});
+	document.getElementById("status").innerHTML = "***Please Wait***";        
+}
+
+function get_log(){
+	var log_get = new sendDataToServer();
+	log_get.sendPostToServer( {"getLog":{"query":true}});
+	document.getElementById("status").innerHTML = "***Please Wait***";        
+}
+
+function update_ver(){
+	var updateVer = new sendDataToServer();
+	updateVer.sendPostToServer( {"updateVer":{"update":true}});
+	document.getElementById("status").innerHTML = "***Please Wait***";        
+}
+
+function sendDataToServer(){
+	this.sendPostToServer = function(obj){
+		var xmlhttp;
+		var jsonString = "jsonString=" + JSON.stringify(obj);
+		if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
+                	xmlhttp=new XMLHttpRequest();
+		}else{// code for IE6, IE5
+			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlhttp.open("POST","service.php", true);
+		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		xmlhttp.onreadystatechange=function(){
+			if (xmlhttp.readyState==4 && xmlhttp.status==200){
+				var response = xmlhttp.responseText;
+				document.getElementById("status").innerHTML = response;        
+			}
+		}
+		xmlhttp.send(jsonString);
+		/*
+		if (xmlhttp.status==200){
+			var response = xmlhttp.responseText;
+			parse(JSON.parse(response));        
+		}
+		*/
+	}		
+}
+</script>
+

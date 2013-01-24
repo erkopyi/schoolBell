@@ -106,6 +106,9 @@ function parse(json_response){
 	if(json_response.updatedToggleEnableRule == "true"){
 		status_page();
 	}
+	if(json_response.updateCronTab == "true"){
+		status_page();
+	}
 	if(json_response.allFiles){
 		load_files(json_response);
 	}
@@ -1022,6 +1025,14 @@ function fileUpload(form, action_url, div_id) {
 }
 
 //***********************************************************************************************
+
+function update_Cron(){
+	var update_cron = new sendDataToServer();
+	update_cron.sendPostToServer( {"updateCron":{"update":true}});
+}
+
+//*********************************************************************************************
+
 function sendDataToServer(){
 	this.sendPostToServer = function(obj){
 		var xmlhttp;

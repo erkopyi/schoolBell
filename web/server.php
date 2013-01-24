@@ -323,6 +323,51 @@ if(isset($_POST['jsonString'])){
 		}
 		$dbhandle->close();
 	}
+	if((isset($json_parse->updateCron)) && ($_SESSION['auth'] == 'true')){
+		$myerror;
+		$match = 1;
+		$status = "";
+		$dbhandle = new SQLite3('db_school.db');
+		$results_1 = $dbhandle->query("SELECT * FROM rules where enabled = 'true'");
+		$tmp_1 = 0;
+		if($results_1){
+			$handle = fopen('cron.txt', 'w');
+			while ($row_1 = $results_1->fetchArray()){
+				$results_2 = $dbhandle->query("SELECT * FROM timeprofile where timeprofileID = {$row_1['timeprofileID']}");
+				if($results_2){
+					while ($row_2 = $results_2->fetchArray()){
+						$tmp_1 = 1;
+						$tmp_string = "";
+						$tmp_string = $row_2['minute'] . " " . $row_2['hour'] . " * * ";
+						$tmp = 0;
+						if($row_2['sun'] == 'true') {$tmp_string = $tmp_string . "0"; $tmp = 1;}
+						if($row_2['mon'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "1"; $tmp = 1;}
+						if($row_2['tue'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "2"; $tmp = 1;}
+						if($row_2['wed'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "3"; $tmp = 1;}
+						if($row_2['thu'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "4"; $tmp = 1;}
+						if($row_2['fri'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "5"; $tmp = 1;}
+						if($row_2['sat'] == 'true') {$tmp_string = $tmp_string . (($tmp == 1) ? "," : "") . "6"; $tmp = 1;}
+						$tmp_string = $tmp_string . " /data/projects/schoolBell/web/start_track.sh '" . $row_1['track'] . "'\n";
+						if ((is_writable('cron.txt')) && ($tmp)) {
+							if (!$handle = fopen('cron.txt', 'a')) {
+							}else if (fwrite($handle, $tmp_string) === FALSE) {
+							}else{
+								shell_exec("crontab cron.txt");
+							}
+							fclose($handle);
+						} else {
+						   // echo "The file $filename is not writable";
+						}
+					}
+				}
+			}
+		}
+		if (!$tmp_1){
+			shell_exec("crontab -r");
+		}
+		$dbhandle->close();
+		echo json_encode(array('updateCronTab' => 'true'));
+	}
 	if((isset($json_parse->play->filename)) && ($_SESSION['auth'] == 'true')){
 		$match = 1;
 		shell_exec("/data/projects/schoolBell/web/start_track.sh '" . $json_parse->play->filename . "'");

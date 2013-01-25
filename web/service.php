@@ -8,7 +8,7 @@ if(isset($_POST['jsonString'])){
 		$rpi_dmesg = shell_exec("dmesg | tail -n 25");
 		echo nl2br($rpi_dmesg);
 	}else if(isset($json_parse->pingInternet)){
-		$rpi_dmesg = shell_exec("ping neti.ee -c 4");
+		$rpi_dmesg = shell_exec("ping neti.ee -c 2");
 		echo nl2br($rpi_dmesg);
 	}
 

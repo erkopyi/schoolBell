@@ -1028,7 +1028,7 @@ function fileUpload(form, action_url, div_id) {
 
 function update_Cron(){
 	var update_cron = new sendDataToServer();
-	document.getElementById("right_header").innerHTML="<h1><p>Palun oota!</p><p>Andmeid uuendatakse..</p></h1>";
+	document.getElementById("right_header").innerHTML="<h2><p>Palun oota!</p><p>Andmeid uuendatakse..</p></h2>";
 	update_cron.sendPostToServer( {"updateCron":{"update":true}});
 }
 
